@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Pipeline v2 — Tim Zinin</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg: #fafafa;
+            --card-bg: #ffffff;
+            --text: #1a1a2e;
+            --accent: #2563eb;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --green: #16a34a;
+            --orange: #ea580c;
+            --purple: #7c3aed;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+        h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .card h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .mermaid { overflow-x: auto; }
+        .sprint-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .sprint-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+        }
+        .sprint-card h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .sprint-card ul { list-style: none; padding: 0; }
+        .sprint-card li { font-size: 0.85rem; color: var(--muted); padding: 0.15rem 0; }
+        .sprint-card li::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 0.5rem; vertical-align: middle; }
+        .s1 { border-top: 3px solid var(--accent); }
+        .s1 li::before { background: var(--accent); }
+        .s2 { border-top: 3px solid var(--green); }
+        .s2 li::before { background: var(--green); }
+        .s3 { border-top: 3px solid var(--orange); }
+        .s3 li::before { background: var(--orange); }
+        .s4 { border-top: 3px solid var(--purple); }
+        .s4 li::before { background: var(--purple); }
+        .principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; }
+        .principle {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+        }
+        .principle strong { display: block; font-size: 0.9rem; margin-bottom: 0.25rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+        th { font-weight: 600; color: var(--muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge-blue { background: #dbeafe; color: #1d4ed8; }
+        .badge-green { background: #dcfce7; color: #15803d; }
+        .badge-orange { background: #ffedd5; color: #c2410c; }
+        .badge-purple { background: #ede9fe; color: #6d28d9; }
+        .badge-gray { background: #f1f5f9; color: #475569; }
+        footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 2rem 0 1rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Content Pipeline v2</h1>
+        <p class="subtitle">Поэтапная контент-система на n8n | Tim Zinin | 20 марта 2026</p>
+
+        <div class="card">
+            <h2>Общая архитектура</h2>
+            <div class="mermaid">
+flowchart TB
+    subgraph SCOUT["РАЗВЕДКА — cron каждые 6ч"]
+        direction LR
+        C1["Schedule<br/>0/6/12/18 MSK"] --> RSS_EN["Google News EN<br/>AI, LLM, agents"]
+        C1 --> RSS_RU["Google News RU<br/>ИИ, карьера"]
+        C1 --> HN["HackerNews<br/>Top Stories"]
+        C1 --> GH["GitHub<br/>Trending"]
+        RSS_EN & RSS_RU & HN & GH --> DEDUP["Дедупликация<br/>SHA256(title)"]
+        DEDUP --> DB_NEWS[("news_feed<br/>30-50 новостей/день")]
+    end
+
+    subgraph WRITER["АВТОР — cron ежедневно 03:00"]
+        direction LR
+        C2["Schedule"] --> PICK["SELECT best<br/>unused news"]
+        PICK --> PROMPT["Persona<br/>+ Golden Examples<br/>+ Anti-patterns"]
+        PROMPT --> LLM["MiniMax M2.5<br/>fallback: Groq"]
+        LLM --> CLEAN["Очистка"]
+        CLEAN --> QG["Quality Gate<br/>12 checks"]
+        QG --> DB_POST[("posts<br/>score >= 70")]
+    end
+
+    subgraph ARTIST["ХУДОЖНИК — cron ежедневно 03:30"]
+        direction LR
+        C3["Schedule"] --> FIND["Посты без<br/>картинок"]
+        FIND --> PEX["Pexels"]
+        PEX -->|miss| GEM["Gemini 2.5"]
+        GEM -->|429| POLL["Pollinations"]
+        PEX & GEM & POLL --> IMG[("posts +<br/>image_url")]
+    end
+
+    subgraph BANK["БАНК КОНТЕНТА"]
+        DB_ALL[("PostgreSQL<br/>Нарратив + Картинка<br/>status: ready")]
+        DASH["Дашборд<br/>Таблицы + превью"]
+    end
+
+    subgraph ADAPTER["АДАПТЕР — cron ежедневно 04:00"]
+        direction LR
+        C4["Schedule"] --> READY["Ready posts"]
+        READY --> SPLIT{"Split"}
+        SPLIT --> TG_A["Telegram<br/>200-600 chars"]
+        SPLIT --> LI_A["LinkedIn<br/>1000-1500 chars"]
+        SPLIT --> TH_A["Threads<br/>200-400 chars"]
+        SPLIT --> OTHER["VK / Bluesky<br/>и другие"]
+        TG_A & LI_A & TH_A & OTHER --> DB_PLAT[("platform_posts<br/>+ scheduled_at")]
+    end
+
+    subgraph QUEUE["ОЧЕРЕДЬ + HITL"]
+        direction LR
+        C5["Schedule<br/>*/30 06-21"] --> DUE["Due posts"]
+        DUE --> HITL["Approval Bot :8791<br/>Inline-кнопки<br/>Approve / Reject"]
+        HITL -->|Approved| CARD["Card Renderer :8792<br/>HTML to PNG"]
+    end
+
+    subgraph PUBLISH["ПУБЛИКАЦИЯ"]
+        direction LR
+        CARD --> TG_P["Telegram<br/>09 / 14 / 20"]
+        CARD --> LI_P["LinkedIn<br/>10:00 пн-сб"]
+        CARD --> TH_P["Threads<br/>по готовности"]
+        CARD --> OTH_P["VK / Bluesky<br/>и другие"]
+    end
+
+    subgraph STATS["СТАТИСТИКА — cron 21:00"]
+        direction LR
+        C7["Schedule"] --> COLLECT["Engagement<br/>APIs"]
+        COLLECT --> SCORE["Performance<br/>Score"]
+        SCORE --> DB_ENG[("engagement")]
+        SCORE --> REPORT["Daily Report<br/>в TG"]
+    end
+
+    SCOUT --> WRITER
+    WRITER --> ARTIST
+    ARTIST --> BANK
+    BANK --> ADAPTER
+    ADAPTER --> QUEUE
+    QUEUE --> PUBLISH
+    PUBLISH --> STATS
+    STATS -.->|feedback loop| WRITER
+
+    style SCOUT fill:#dbeafe,stroke:#2563eb
+    style WRITER fill:#dcfce7,stroke:#16a34a
+    style ARTIST fill:#fef3c7,stroke:#d97706
+    style BANK fill:#f1f5f9,stroke:#64748b
+    style ADAPTER fill:#ede9fe,stroke:#7c3aed
+    style QUEUE fill:#ffedd5,stroke:#ea580c
+    style PUBLISH fill:#fce7f3,stroke:#db2777
+    style STATS fill:#e0f2fe,stroke:#0284c7
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Принципы</h2>
+            <div class="principles">
+                <div class="principle"><strong>Копируем, не пишем</strong>Берём LinkedIn Pipeline v3, разбиваем на этапы</div>
+                <div class="principle"><strong>HITL сохраняется</strong>Approval Bot (:8791) + inline-кнопки — как есть</div>
+                <div class="principle"><strong>Параллельная работа</strong>Старый flow не выключаем до стабилизации</div>
+                <div class="principle"><strong>Дедупликация</strong>SHA256(title[:80]) — одна новость не попадёт дважды</div>
+                <div class="principle"><strong>TG приоритет #1</strong>Telegram первый, LinkedIn второй, Threads третий</div>
+                <div class="principle"><strong>PostgreSQL</strong>Схема content в существующей БД n8n</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Спринты</h2>
+            <div class="sprint-grid">
+                <div class="sprint-card s1">
+                    <h3><span class="badge badge-blue">Спринт 1</span> Разведка + Дашборд</h3>
+                    <ul>
+                        <li>PostgreSQL schema (4 таблицы)</li>
+                        <li>WF "Scout" — RSS + HN + GH + dedup</li>
+                        <li>WF "Dashboard" — HTML с таблицей новостей</li>
+                        <li>Проверка: 30+ новостей в таблице</li>
+                    </ul>
+                </div>
+                <div class="sprint-card s2">
+                    <h3><span class="badge badge-green">Спринт 2</span> Автор + Художник</h3>
+                    <ul>
+                        <li>WF "Writer" — MiniMax + Quality Gate</li>
+                        <li>WF "Illustrator" — Pexels/Gemini/Pollin</li>
+                        <li>Дашборд: таблица постов + превью</li>
+                        <li>Проверка: посты с картинками в таблице</li>
+                    </ul>
+                </div>
+                <div class="sprint-card s3">
+                    <h3><span class="badge badge-orange">Спринт 3</span> HITL + Публикация TG</h3>
+                    <ul>
+                        <li>WF "Adapter" — адаптация под TG</li>
+                        <li>WF "Publisher" — HITL + TG publish</li>
+                        <li>Approval Bot — те же inline-кнопки</li>
+                        <li>Проверка: пост в @timofeyzinin</li>
+                    </ul>
+                </div>
+                <div class="sprint-card s4">
+                    <h3><span class="badge badge-purple">Спринт 4</span> LinkedIn + Threads + Stats</h3>
+                    <ul>
+                        <li>Расширить Adapter на LI + Threads</li>
+                        <li>WF "Analyst" — engagement + report</li>
+                        <li>Daily report в TG</li>
+                        <li>Деактивировать старые workflows</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Что переиспользуем</h2>
+            <table>
+                <thead>
+                    <tr><th>Компонент</th><th>Источник</th><th>Действие</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Approval Bot (:8791)</td><td>Текущий Docker</td><td><span class="badge badge-gray">Не трогаем</span></td></tr>
+                    <tr><td>Card Renderer (:8792)</td><td>Текущий Docker</td><td><span class="badge badge-gray">Не трогаем</span></td></tr>
+                    <tr><td>RSS + MiniMax + Cleaning</td><td>LinkedIn Pipeline v3</td><td><span class="badge badge-blue">Копируем</span></td></tr>
+                    <tr><td>Pexels Search</td><td>LinkedIn Pipeline v3</td><td><span class="badge badge-blue">Копируем</span></td></tr>
+                    <tr><td>Quality Gate (12 checks)</td><td>content-factory/quality_gate.py</td><td><span class="badge badge-green">Переносим</span></td></tr>
+                    <tr><td>Persona + Strategies</td><td>content-factory/config/</td><td><span class="badge badge-green">Переносим</span></td></tr>
+                    <tr><td>Queue Publisher логика</td><td>Текущий cron</td><td><span class="badge badge-green">Переносим</span></td></tr>
+                    <tr><td>MiniMax credential</td><td>n8n credentials</td><td><span class="badge badge-gray">Используем</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Хранилище — PostgreSQL</h2>
+            <div class="mermaid">
+erDiagram
+    news_feed {
+        serial id PK
+        text title
+        text url
+        text source
+        int score
+        text title_hash UK
+        boolean used
+        timestamptz fetched_at
+    }
+    posts {
+        serial id PK
+        int news_id FK
+        text post_text
+        text topic_cluster
+        text category
+        int quality_score
+        text image_url
+        text status
+        timestamptz created_at
+    }
+    platform_posts {
+        serial id PK
+        int post_id FK
+        text platform
+        text adapted_text
+        timestamptz scheduled_at
+        timestamptz published_at
+        text status
+        text post_external_id
+    }
+    engagement {
+        serial id PK
+        int platform_post_id FK
+        int views
+        int likes
+        int comments
+        float engagement_rate
+        int performance_score
+    }
+    news_feed ||--o{ posts : "generates"
+    posts ||--o{ platform_posts : "adapts to"
+    platform_posts ||--o{ engagement : "tracks"
+            </div>
+        </div>
+
+        <footer>
+            Content Pipeline v2 &mdash; Zinin Corp &mdash; timzinin.com
+        </footer>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+            securityLevel: 'loose'
+        });
+    </script>
+</body>
+</html>
