@@ -84,30 +84,32 @@ flowchart TB
         DB_PP --> SYNC["Синхронизация<br/>Content Dashboard"]
     end
 
-    subgraph PLATFORMS["10 ПЛАТФОРМ"]
+    subgraph PUBLISH["PUBLISHER - Публикация | cron */30 06-21"]
         direction LR
-        P_RU["RU: Telegram | LinkedIn<br/>VK | Facebook | Threads"]
-        P_EN["EN: Bluesky | Mastodon<br/>Threads EN | Dev.to | Hashnode"]
+        PUB_DIRECT["Direct API<br/>TG, LinkedIn, VK<br/>Bluesky, Threads RU<br/>Mastodon, Dev.to, Hashnode"]
+        PUB_PUBLER["Publer API<br/>Facebook, TikTok<br/>Threads EN"]
     end
 
-    subgraph PUBLISH["PUBLISHER - будущий спринт"]
+    subgraph STATS["ANALYST - Аналитика | cron 21:00"]
         direction LR
-        PUB1["Approval Bot :8791<br/>HITL"] --> PUB2["Direct API<br/>TG, LI, VK, Bluesky<br/>Threads, Mastodon"]
-        PUB1 --> PUB3["Publer API<br/>Facebook, TikTok<br/>Threads EN"]
+        ST1["Сбор engagement<br/>APIs платформ"] --> ST2["Performance<br/>Score"]
+        ST2 --> DB_ENG[("engagement")]
+        ST2 --> ST3["Daily Report<br/>в Telegram"]
     end
 
     SCOUT --> WRITER
     WRITER --> ILLUSTRATOR
     ILLUSTRATOR --> ADAPTER
-    ADAPTER --> PLATFORMS
-    PLATFORMS -.-> PUBLISH
+    ADAPTER --> PUBLISH
+    PUBLISH --> STATS
+    STATS -.->|"feedback loop<br/>лучшие темы"| SCOUT
 
     style SCOUT fill:#dbeafe,stroke:#2563eb
     style WRITER fill:#dcfce7,stroke:#16a34a
     style ILLUSTRATOR fill:#fef3c7,stroke:#d97706
     style ADAPTER fill:#ede9fe,stroke:#7c3aed
-    style PLATFORMS fill:#fce7f3,stroke:#db2777
-    style PUBLISH fill:#f1f5f9,stroke:#94a3b8,stroke-dasharray:5
+    style PUBLISH fill:#fce7f3,stroke:#db2777
+    style STATS fill:#e0f2fe,stroke:#0284c7
             </div>
         </div>
 
@@ -157,20 +159,23 @@ flowchart TB
                     </ul>
                 </div>
                 <div class="wf-card wip">
-                    <h3><span class="badge badge-orange">WIP</span> Publisher - Публикатор</h3>
+                    <h3><span class="badge badge-orange">NEXT</span> Publisher - Публикатор</h3>
                     <ul>
-                        <li>HITL через Approval Bot (:8791)</li>
-                        <li>Direct API: TG, LinkedIn, Threads RU, VK, Bluesky, Mastodon</li>
-                        <li>Publer API: Facebook, TikTok, Threads EN</li>
-                        <li>Автоматический комментарий (LinkedIn/FB)</li>
+                        <li>Автопубликация без HITL (контент достаточно качественный)</li>
+                        <li>Direct API: TG, LinkedIn (+комментарий), Threads RU (+reply), VK, Bluesky, Mastodon</li>
+                        <li>Publer API: Facebook (+комментарий), TikTok, Threads EN (+reply)</li>
+                        <li>Dev.to + Hashnode: статьи через API</li>
+                        <li>Cron */30 06:00-21:00 MSK</li>
                     </ul>
                 </div>
-                <div class="wf-card planned">
-                    <h3><span class="badge badge-gray">PLAN</span> Analyst - Аналитик</h3>
+                <div class="wf-card wip">
+                    <h3><span class="badge badge-orange">NEXT</span> Analyst - Аналитик</h3>
                     <ul>
                         <li>Сбор engagement через API платформ</li>
-                        <li>Daily report в Telegram</li>
-                        <li>Feedback loop: лучшие темы в Scout</li>
+                        <li>Performance score per post</li>
+                        <li>Daily report в Telegram (21:00 MSK)</li>
+                        <li>Feedback loop: лучшие темы приоритетнее в Scout</li>
+                        <li>Cron 21:00 MSK</li>
                     </ul>
                 </div>
             </div>
