@@ -28,7 +28,7 @@
 **Credentials n8n:**
 - PostgreSQL: id=ZoqVLKcTqNQGoDI5, name="Content Pipeline PG"
 - MiniMax: id=XuWX7OQvQ3kOGJRj, name="MiniMax API v2"
-- n8n логин: tim@timzinin.com / [REDACTED]
+- n8n логин: tim@timzinin.com (пароль в безопасном хранилище)
 
 **Gemini Image Service:**
 - Docker контейнер `gemini-image-service` в сети `zinin-corp_default`
@@ -76,13 +76,13 @@
 
 **Threads аккаунты:**
 - @timzinin (RU, основной) — работает, API token на Contabo: THREADS_ACCESS_TOKEN
-- timzinin_en (EN) — создан, залогинен в Threads, пароль: [REDACTED]
+- timzinin_en (EN) — создан, залогинен в Threads (пароль в безопасном хранилище)
 - timzinin_th (TH) — создан в Instagram, email привязан: [REDACTED], в Threads НЕ залогинен (проблема с паролем)
 
 **Threads API:**
 - App: Zinin Threads (ID: 881402564532283)
 - Threads App ID: 1227588962261659
-- Threads App Secret: [REDACTED]
+- Threads App Secret: (в безопасном хранилище)
 - Redirect URI: https://sborka.work/threads-callback
 - OAuth catcher на Contabo :8801 + nginx proxy настроен
 - timzinin_en добавлен как Тестировщик Threads — статус "На рассмотрении"
@@ -102,7 +102,7 @@
 ### Спринт 2 (завершить):
 1. **Publer API key** — зайти в Publer → Settings → Access & Login → прокрутить вниз → Generate API Key → скопировать → сохранить на Contabo
 2. **Threads EN OAuth token** — дождаться одобрения тестировщика → OAuth → получить access token → сохранить на Contabo
-3. **Threads TH** — войти в Threads через timzinin_th (нужен сброс пароля через email [REDACTED]) → добавить как тестировщика → OAuth → token
+3. **Threads TH** — войти в Threads через timzinin_th (сброс пароля через email) → добавить как тестировщика → OAuth → token
 4. **Substack** — завершить регистрацию "AI Digest"
 
 ### Спринт 3: Adapter workflow (n8n)
@@ -141,16 +141,8 @@
 
 ## КРИТИЧЕСКИЕ CREDENTIALS
 
-| Что | Где |
-|-----|-----|
-| n8n | tim@timzinin.com / [REDACTED] |
-| Facebook (Meta) | timiich@yandex.ru / [REDACTED] |
-| Threads App Secret | [REDACTED] |
-| Threads App ID | 1227588962261659 |
-| Instagram timzinin_en | timzinin_en / [REDACTED] |
-| Instagram timzinin_th | timzinin_th / [REDACTED] (пароль может не работать, нужен сброс) |
-| OpenRouter | [REDACTED] |
-| Publer | tim.zinin@gmail.com (Google OAuth), Business план |
+**ПЕРЕМЕЩЕНЫ В БЕЗОПАСНОЕ ХРАНИЛИЩЕ. Не хранить секреты в git.**
+Credentials доступны в `memory/api_credentials.b64` (локально, не в git).
 
 ## ХУКИ (обновлённые)
 
