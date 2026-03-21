@@ -66,9 +66,9 @@ flowchart TB
 
     subgraph WRITER["WRITER - Автор | cron 03:00"]
         direction LR
-        W1["Лучшая новость<br/>по score"] --> W2["MiniMax M2.5<br/>700-1200 символов"]
+        W1["TOP-5 новостей<br/>по score"] --> W2["MiniMax M2.5<br/>700-1200 символов<br/>x5 постов"]
         W2 --> W3["Quality Gate<br/>12 проверок"]
-        W3 --> DB_POST[("posts<br/>score >= 65")]
+        W3 --> DB_POST[("posts<br/>3-5 постов/день")]
     end
 
     subgraph ILLUSTRATOR["ILLUSTRATOR - Художник | cron 03:30"]
@@ -82,6 +82,17 @@ flowchart TB
         A1["Неадаптированные<br/>посты"] --> A2["MiniMax M2.5<br/>10 платформ"]
         A2 --> DB_PP[("platform_posts<br/>пост + комментарий<br/>+ reply + ссылка")]
         DB_PP --> SYNC["Синхронизация<br/>Content Dashboard"]
+    end
+
+    subgraph CURATOR["CURATOR - Куратор | после Adapter"]
+        direction LR
+        CUR1["5 постов x 10 платформ<br/>= 50 адаптаций"] --> CUR2{"Распределение<br/>по частоте"}
+        CUR2 --> CUR_TH["Threads RU/EN<br/>все 5 постов"]
+        CUR2 --> CUR_TG["Telegram<br/>2 лучших"]
+        CUR2 --> CUR_LI["LinkedIn<br/>1 лучший"]
+        CUR2 --> CUR_VK["VK / FB<br/>1-2 поста"]
+        CUR2 --> CUR_EN["Bluesky / Mastodon<br/>2-3 поста"]
+        CUR2 --> CUR_ART["Dev.to / Hashnode<br/>1 статья/нед"]
     end
 
     subgraph PUBLISH["PUBLISHER - Публикация | cron */30 06-21"]
@@ -100,7 +111,8 @@ flowchart TB
     SCOUT --> WRITER
     WRITER --> ILLUSTRATOR
     ILLUSTRATOR --> ADAPTER
-    ADAPTER --> PUBLISH
+    ADAPTER --> CURATOR
+    CURATOR --> PUBLISH
     PUBLISH --> STATS
     STATS -.->|"feedback loop<br/>лучшие темы"| SCOUT
 
@@ -108,6 +120,7 @@ flowchart TB
     style WRITER fill:#dcfce7,stroke:#16a34a
     style ILLUSTRATOR fill:#fef3c7,stroke:#d97706
     style ADAPTER fill:#ede9fe,stroke:#7c3aed
+    style CURATOR fill:#fff7ed,stroke:#ea580c
     style PUBLISH fill:#fce7f3,stroke:#db2777
     style STATS fill:#e0f2fe,stroke:#0284c7
             </div>
@@ -130,8 +143,8 @@ flowchart TB
                 <div class="wf-card done">
                     <h3><span class="badge badge-green">DONE</span> Writer - Автор</h3>
                     <ul>
-                        <li>Берёт лучшую неиспользованную новость</li>
-                        <li>MiniMax M2.5 (700-1200 символов RU)</li>
+                        <li>Берёт TOP-5 неиспользованных новостей</li>
+                        <li>MiniMax M2.5 (700-1200 символов RU) x5</li>
                         <li>Anti-AI writing rules в промпте</li>
                         <li>Quality Gate (12 проверок, score >= 65)</li>
                         <li>Извлечение product_url + product_name</li>
@@ -156,6 +169,19 @@ flowchart TB
                         <li>Ссылка: body / comment / reply / none</li>
                         <li>Авто-синхронизация Content Dashboard</li>
                         <li>Cron 04:00 MSK</li>
+                    </ul>
+                </div>
+                <div class="wf-card wip">
+                    <h3><span class="badge badge-orange">NEXT</span> Curator - Куратор</h3>
+                    <ul>
+                        <li>Распределяет посты по платформам с учётом частоты</li>
+                        <li>Threads RU/EN: все 5 постов/день</li>
+                        <li>Telegram: 2 лучших/день (09:00, 14:00 Dubai)</li>
+                        <li>LinkedIn: 1 лучший/день (10:00 Dubai)</li>
+                        <li>VK / Facebook: 1-2 поста (3x/нед)</li>
+                        <li>Bluesky / Mastodon: 2-3 поста/день</li>
+                        <li>Dev.to / Hashnode: 1 статья/нед (лучший пост)</li>
+                        <li>Устанавливает scheduled_at для каждой адаптации</li>
                     </ul>
                 </div>
                 <div class="wf-card wip">
