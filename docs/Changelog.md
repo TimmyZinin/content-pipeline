@@ -1,0 +1,46 @@
+# Changelog
+
+> Лог изменений Content Pipeline v2. Новые записи — сверху.
+
+---
+
+## 2026-03-22 | Спринт 2 Curator: Smart Scheduling
+- Дедупликация по topic_cluster (3-дневное окно)
+- Fresh посты приоритетнее stale
+- Curator Preview workflow (JzYcKrUfXheatEi1) — dry-run без изменения БД
+- Dashboard: +2 стата (Назначено, Пропущено)
+- Dashboard SQL: platform_scheduled, platform_skipped
+
+## 2026-03-22 | Спринт 1 Curator: MVP
+- Создан n8n workflow "Curator — Куратор" (EYPcT5B4rLmQRQBM)
+- Cron 04:30 MSK (после Adapter 04:00)
+- Tier-система: T1 ежедневно, T2 ПН/СР/ПТ, T3 только ПН
+- Quality-based selection: лучшие по score → приоритетным платформам
+- Stagger scheduling: Dubai UTC+4
+- Publisher SQL обновлён: WHERE status='scheduled' AND scheduled_at <= NOW()
+- Тест: 14 scheduled, 26 skipped (суббота)
+
+## 2026-03-22 | Publisher v2
+- Создан Publisher v2 workflow (1cD3qXs2XZkgcQyt)
+- 10 нод, cron */30 06-21 MSK
+- Верифицированы: Telegram ✅, Dev.to ✅
+- Деактивированы: LinkedIn Pipeline v3, Threads News
+
+## 2026-03-21 | Adapter workflow
+- Создан Adapter workflow (NJoPcdp38ZU0dQwG), cron 04:00
+- 10 платформ: TG, LI, Threads RU/EN, VK, Bluesky, FB, Mastodon, Dev.to, Hashnode
+- Составные сущности: post_text + comment_text + reply_text + link_url
+- ALTER TABLE platform_posts: +5 столбцов
+- Dashboard обновлён: секция "Расписание публикаций"
+
+## 2026-03-21 | Publer API + стратегии
+- Publer API key получен (de555d3f...)
+- 3 аккаунта: Facebook, Threads EN, TikTok
+- Обновлены 16 стратегий в smm-research-hub
+
+## 2026-03-20 | Первый запуск
+- Scout, Writer, Illustrator, Dashboard — все active
+- PostgreSQL schema content создана
+- Gemini Image Service (Docker :8800)
+- GitHub Pages: timzinin.com/content-pipeline/
+- Первые 10 постов с pop-art картинками
