@@ -125,8 +125,8 @@ flowchart LR
     CRON["Schedule\n*/30 09-03 Istanbul"] --> SQL["Select Scheduled\nLIMIT 1\nWHERE platform IN allowlist"]
     SQL --> IF1{"Has Post?"}
     IF1 -->|Да| HTTP["Call Publisher\nPOST :8085/publish"]
-    HTTP --> UPD["Update Status\nsent / failed + retry"]
-    UPD --> IF2{"Dead Letter?\nretries >= 3"}
+    HTTP --> CHK["Check Result\n(pass-through, no DB write)"]
+    CHK --> IF2{"Dead Letter?\nretries >= 3"}
     IF2 -->|Да| TG["TG Alert"]
 ```
 

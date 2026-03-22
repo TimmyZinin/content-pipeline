@@ -5,7 +5,9 @@
 
 ## Publisher v3 — Select Scheduled (with allowlist)
 
-**n8n workflow:** ErbbScuvxWHLX1np, node "Select Scheduled"
+**n8n workflow:** ErbbScuvxWHLX1np
+**Status ownership:** Publisher Service writes sent/failed. n8n "Check Result" node = pass-through only.
+**Node "Select Scheduled":**
 
 ```sql
 SELECT id, platform, substring(adapted_text for 80) as preview
