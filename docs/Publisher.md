@@ -23,7 +23,7 @@ Schedule → Select Scheduled → Has Post? → Call Publisher → Update Status
 |--------|------|-------|--------|-------------|
 | POST | /publish | {platform_post_id} | {status, platform, post_id, external_id, error} | Yes (sending→sent/failed) |
 | POST | /verify | {platform_post_id} | {status, platform, post_id, reason} | No |
-| POST | /test-publish | {platform, text, image_url?} | {status, platform, post_id, external_id, error} | **No** — safe test, no DB |
+| POST | /test-publish | — | HTTP 403 | **DISABLED** — published to real accounts |
 | GET | /health | — | {status: "ok"} | No |
 
 **Safe testing:** `/test-publish` **ОТКЛЮЧЁН** (HTTP 403). Публиковал в реальные аккаунты. Для тестирования — только local adapter testing.
@@ -83,7 +83,13 @@ scheduled → sending → failed (после 3 retry)
 ### Deactivated
 - **Publisher v2** (1cD3qXs2XZkgcQyt) — ДЕАКТИВИРОВАН 22 мар 2026. Был причиной дубликатов и публикаций без картинок.
 
-### Verified platforms (через Python Service)
+### Current Rollout (Phase 1 allowlist)
+
+**Сейчас активно публикуются только:** telegram, writeas, minds
+
+Остальные платформы отфильтрованы SQL upstream. Не публикуются, не retry, не failed.
+
+### Historically Verified Capability (через Python Service)
 
 | Платформа | Статус | External ID | Примечание |
 |-----------|--------|-------------|-----------|
@@ -123,8 +129,9 @@ scheduled → sending → failed (после 3 retry)
 2. Процессное правило: ручной `curl POST /publish` по prod scheduled постам запрещён
 3. Тестирование: создавать отдельный тестовый пост с уникальным текстом
 
-Safe testing path:
-- **`POST /test-publish`** — dedicated endpoint, не трогает БД, изолирован от prod scheduler. Deployed.
+Safe testing:
+- **`POST /test-publish` — DISABLED** (HTTP 403). Публиковал в реальные аккаунты. Инцидент 22 мар.
+- Для тестирования платформ — только local adapter testing вне Docker.
 
 Инцидент 22 мар: дубли в TG, LinkedIn, VK — все от одной причины (ручной curl без обновления статуса).
 

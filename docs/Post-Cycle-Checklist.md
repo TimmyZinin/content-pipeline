@@ -35,7 +35,7 @@ ORDER BY platform, status;
 
 ## 4. No Noise Check
 
-- [ ] Нет `failed` записей для неразрешённых платформ
+- [ ] Нет **новых** `failed` записей (filter: `created_at > last cycle start`). Старые failed от cleanup 22 мар — игнорировать
 - [ ] Нет TG alerts от dead letter
 - [ ] Нет дубликатов
 
