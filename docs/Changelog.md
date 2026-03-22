@@ -4,6 +4,15 @@
 
 ---
 
+## 2026-03-22 | CTA/Link Placement Audit + Incident Containment
+- /test-publish DISABLED (HTTP 403) — was publishing to real accounts
+- Strategy audit: CTA placement matrix for all platforms (new doc: CTA-Placement.md)
+- Root cause: Publisher Service passes link_url to adapters but adapters ignore it
+- Etap 1 code (body links) written in Publisher Service but NOT verified live
+- Etap 2 (comment/reply post-publish) identified as gap, NOT implemented
+- Data model sufficient — no schema changes needed
+- LinkedIn CTA design deferred to Sprint 4G
+
 ## 2026-03-22 | Sprint 4C: Text Coverage Completion
 - Bluesky: text verified (5/5 tests), image blocked (blob >1MB, platform limit)
 - Write.as: ✅ working, verified via /test-publish
