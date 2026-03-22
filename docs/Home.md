@@ -29,7 +29,7 @@ flowchart LR
     W --> I[Illustrator ✅]
     I --> A[Adapter ✅\n14 платформ]
     A --> C[Curator ✅\nTier + dedup]
-    C --> P[Publisher v3\nPhase 1: TG+WA+Minds]
+    C --> P[Publisher v3\nRollout: TG+WA+Minds]
     P --> AN[Analyst ❌]
     AN --> F[Feedback ❌]
 ```
@@ -43,7 +43,7 @@ flowchart LR
 | 3 | Illustrator | ✅ Active | Z94O5uyaFEmrYGIJ | 06:30 Istanbul |
 | 4 | Adapter | ✅ Active | NJoPcdp38ZU0dQwG | 07:00 Istanbul |
 | 5 | Curator | ✅ Active | EYPcT5B4rLmQRQBM | 07:30 Istanbul |
-| 6 | Publisher v3 | ⚠️ Phase 1 (telegram, writeas, minds) | ErbbScuvxWHLX1np | */30 09-03 Istanbul |
+| 6 | Publisher v3 | ⚠️ Staged rollout (telegram, writeas, minds) | ErbbScuvxWHLX1np | */30 09-03 Istanbul |
 | 7 | Dashboard | ✅ Active | DC3a34HOedbU7rVb | webhook |
 | 8 | Curator Preview | ✅ Active | JzYcKrUfXheatEi1 | webhook |
 | 9 | Observer | ✅ Active | V2wnna7ACw5iSqdi | webhook |

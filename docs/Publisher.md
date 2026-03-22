@@ -49,7 +49,7 @@ WHERE platform IN ('telegram','writeas','minds')
 1. n8n workflow SQL: `platform IN (...)`
 2. Contabo env: `PUBLISH_ALLOWLIST=...` + restart publisher-service
 
-**Текущий Phase 1:** telegram, writeas, minds
+**Текущий rollout stage:** telegram, writeas, minds
 
 **Anti-duplicate guard:** перед публикацией сервис атомарно ставит `status='sending'` через `UPDATE ... WHERE status IN ('scheduled','failed') RETURNING id`. Если пост уже `sent`, `verified`, `published` или `sending` — возвращает HTTP 400/409. Это предотвращает повторную публикацию при параллельных вызовах или ручном тестировании.
 
@@ -83,7 +83,7 @@ scheduled → sending → failed (после 3 retry)
 ### Deactivated
 - **Publisher v2** (1cD3qXs2XZkgcQyt) — ДЕАКТИВИРОВАН 22 мар 2026. Был причиной дубликатов и публикаций без картинок.
 
-### Current Rollout (Phase 1 allowlist)
+### Current Rollout (staged allowlist)
 
 **Сейчас активно публикуются только:** telegram, writeas, minds
 

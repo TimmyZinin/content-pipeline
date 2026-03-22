@@ -11,7 +11,7 @@
 | 3 | Illustrator — Художник | Z94O5uyaFEmrYGIJ | 06:30 Istanbul | ✅ Active |
 | 4 | Adapter — Адаптер | NJoPcdp38ZU0dQwG | 07:00 Istanbul | ✅ Active |
 | 5 | Curator — Куратор | EYPcT5B4rLmQRQBM | 07:30 Istanbul | ✅ Active |
-| 6 | Publisher v3 | ErbbScuvxWHLX1np | */30 09:00-03:00 Istanbul | ⚠️ Phase 1 rollout (telegram, writeas, minds) |
+| 6 | Publisher v3 | ErbbScuvxWHLX1np | */30 09:00-03:00 Istanbul | ⚠️ Staged rollout (telegram, writeas, minds) |
 | 7 | Dashboard — Дашборд | DC3a34HOedbU7rVb | webhook | ✅ Active |
 | 8 | Curator Preview | JzYcKrUfXheatEi1 | webhook | ✅ Active |
 | 9 | Observer — Наблюдатель | V2wnna7ACw5iSqdi | webhook | ✅ Active |
@@ -133,7 +133,7 @@ flowchart LR
 **Python Publisher Service:** Docker :8086 (internal :8085), reads post by ID from DB, calls auto-publisher adapter
 **Модель:** `scheduled → sending (lock) → sent (API ok) → verified (/verify)` / `→ failed (retry 3x → TG alert)`
 **Anti-duplicate:** atomic lock через `sending` status, отказ при повторном вызове
-**Current rollout (Phase 1):** telegram, writeas, minds
+**Current rollout (staged):** telegram, writeas, minds
 **Historically verified capability (10):** Telegram, Dev.to, VK, Threads RU, Hashnode, Facebook (Publer), Threads EN (Publer), Write.as, Minds, Nostr
 **Partial capability:** Bluesky (text ok, image >1MB blocked)
 **Blocked:** Tumblr (401 OAuth), Mastodon (401 token)
