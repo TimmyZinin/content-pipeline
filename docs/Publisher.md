@@ -19,11 +19,14 @@ Schedule → Select Scheduled → Has Post? → Call Publisher → Update Status
 **Credentials:** /opt/zinin-corp/.env (env_file в docker-compose)
 
 **Endpoints:**
-| Method | Path | Input | Output |
-|--------|------|-------|--------|
-| POST | /publish | {platform_post_id} | {status, platform, post_id, external_id, error} |
-| POST | /verify | {platform_post_id} | {status, platform, post_id, reason} |
-| GET | /health | — | {status: "ok"} |
+| Method | Path | Input | Output | DB changes? |
+|--------|------|-------|--------|-------------|
+| POST | /publish | {platform_post_id} | {status, platform, post_id, external_id, error} | Yes (sending→sent/failed) |
+| POST | /verify | {platform_post_id} | {status, platform, post_id, reason} | No |
+| POST | /test-publish | {platform, text, image_url?} | {status, platform, post_id, external_id, error} | **No** — safe test, no DB |
+| GET | /health | — | {status: "ok"} | No |
+
+**Safe testing:** `/test-publish` для ручного тестирования платформ. Не трогает БД, не может создать дубликаты. Используй вместо `/publish` при проверке новых адаптеров.
 
 **Anti-duplicate guard:** перед публикацией сервис атомарно ставит `status='sending'` через `UPDATE ... WHERE status IN ('scheduled','failed') RETURNING id`. Если пост уже `sent`, `verified`, `published` или `sending` — возвращает HTTP 400/409. Это предотвращает повторную публикацию при параллельных вызовах или ручном тестировании.
 
@@ -63,7 +66,7 @@ scheduled → sending → failed (после 3 retry)
 |-----------|--------|-------------|-----------|
 | Telegram | ✅ sent | 292, 293 | Верифицировано внешне (Тим видел в канале) |
 | Dev.to | ✅ sent | 3384773 | Статья опубликована |
-| VK | ✅ sent | 350 | wall.post через user token |
+| VK | ✅ sent (text+image) | 351 | wall.post в сообщество (group 229813427). Target = community wall |
 | Threads RU | ✅ sent | 17992609448939339 | Двухшаговый API (create+publish) |
 | Hashnode | ✅ sent | 69c0062180048b76fe51c505 | GraphQL mutation |
 | Bluesky | ✅ sent (1 test) | at://...3mhnuulnbph2x | Адаптер работает. Ранее 400 при тексте >300 chars с em-dash |
@@ -91,12 +94,19 @@ scheduled → sending → failed (после 3 retry)
 - Publisher v2 деактивирован
 - Publisher v3 обновляет статус на `sent` сразу после успешного вызова
 
-**Правила предотвращения дублей:**
-1. Ручной `curl POST /publish` по prod scheduled постам **запрещён**
-2. Anti-duplicate guard (atomic `sending` lock) защищает от параллельных вызовов
-3. Для тестирования новых платформ — создавать отдельный тестовый пост с уникальным текстом
-4. После любого ручного теста — немедленно проверить статус в БД и обновить если нужно
-5. Дубли 22 мар (TG, LinkedIn, VK) — все от одной причины: ручной тест без обновления статуса
+**Anti-duplicate measures:**
+
+Риск дублей значительно снижен, но не исключён полностью. Root cause известен.
+
+Текущие меры:
+1. Anti-duplicate guard: atomic `sending` lock в Publisher Service (HTTP 400/409 при повторном вызове)
+2. Процессное правило: ручной `curl POST /publish` по prod scheduled постам запрещён
+3. Тестирование: создавать отдельный тестовый пост с уникальным текстом
+
+Safe testing path:
+- **`POST /test-publish`** — dedicated endpoint, не трогает БД, изолирован от prod scheduler. Deployed.
+
+Инцидент 22 мар: дубли в TG, LinkedIn, VK — все от одной причины (ручной curl без обновления статуса).
 
 ---
 
