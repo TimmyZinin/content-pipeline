@@ -101,12 +101,13 @@ graph LR
 | 07:30 | Curator | Распределение по расписанию |
 | 09:00-00:00 | Publisher | Публикация каждые 30 мин по scheduled_at |
 
-## Текущая модель статусов
-
-> Модель `scheduled → published` действует до Sprint 4.
-> В Sprint 4 вводится `scheduled → sent → verified/failed`.
+## Текущая модель статусов (Sprint 4A/4B/4C)
 
 ```
-draft → scheduled → published (текущая, без внешней верификации)
+draft → scheduled → sending (atomic lock) → sent (API ok) → verified (read-back)
+draft → scheduled → sending → failed (after 3 retry)
 draft → skipped (пропущен Curator)
+published = legacy статус от старого Publisher v2
 ```
+
+> Подробнее: [[Database]], [[Publisher]]

@@ -11,7 +11,7 @@
 | 3 | Illustrator — Художник | Z94O5uyaFEmrYGIJ | 06:30 Istanbul | ✅ Active |
 | 4 | Adapter — Адаптер | NJoPcdp38ZU0dQwG | 07:00 Istanbul | ✅ Active |
 | 5 | Curator — Куратор | EYPcT5B4rLmQRQBM | 07:30 Istanbul | ✅ Active |
-| 6 | Publisher v3 | ErbbScuvxWHLX1np | */30 09:00-03:00 Istanbul | ✅ Active (5/10) |
+| 6 | Publisher v3 | ErbbScuvxWHLX1np | */30 09:00-03:00 Istanbul | ✅ Active (10 working, 2 blocked, 1 partial) |
 | 7 | Dashboard — Дашборд | DC3a34HOedbU7rVb | webhook | ✅ Active |
 | 8 | Curator Preview | JzYcKrUfXheatEi1 | webhook | ✅ Active |
 | 9 | Observer — Наблюдатель | V2wnna7ACw5iSqdi | webhook | ✅ Active |

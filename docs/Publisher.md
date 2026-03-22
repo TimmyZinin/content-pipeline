@@ -88,7 +88,7 @@ scheduled → sending → failed (после 3 retry)
 
 **Что произошло:** Telegram и LinkedIn получили дублированные посты Zeroboot.
 
-**Root cause:** Ручное тестирование Publisher Service через `curl POST /publish` не обновляет статус в БД (это ответственность n8n). Пост остался `scheduled`, и Publisher v2/v3 отправил его повторно.
+**Root cause:** До внедрения anti-duplicate guard, ручной `curl POST /publish` ставил `sending` но при ошибке не переводил в `sent/failed` (это делает n8n Update Status нода). Пост оставался `scheduled` в БД, и publisher workflow отправлял его повторно. После fix: Publisher Service атомарно ставит `sending` перед публикацией — повторный вызов по тому же посту возвращает 409.
 
 **Что сделано:**
 - Publisher v2 деактивирован
