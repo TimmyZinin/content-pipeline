@@ -42,6 +42,17 @@
 - Wiki = mirror
 - При расхождении — docs/ приоритет
 
+## Bridge Protocol
+Перед каждым существенным шагом Claude ОБЯЗАН прочитать:
+1. **CODEX_TO_CLAUDE.md** — активные указания от Codex
+2. **CLAUDE_CODEX_BRIDGE.md** — последний handoff
+3. **DECISIONS.md** — устойчивые правила
+
+Файлы:
+- CLAUDE_CODEX_BRIDGE.md — Claude → Codex (append-only, newest top)
+- CODEX_TO_CLAUDE.md — Codex → Claude (active directives, newest top)
+- DECISIONS.md — persistent policy (this file)
+
 ## Definition of Done
 - Runtime changed
 - Repo updated
