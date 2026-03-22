@@ -6,6 +6,96 @@
 
 ---
 
+## [2026-03-23 02:50 Istanbul] Claude — Sprint 4G Deepened Audit
+
+### 1. LinkedIn Code-Path Map
+
+```
+linkedin_pipeline.py (manual run)
+  → pick_topic() from 13 hardcoded TOPICS
+  → web_search() via Google News RSS
+  → call_minimax() → generate 800-1500 char RU text
+  → render_card() via card_renderer.py (Playwright) or Pillow fallback
+  → upload_catbox() → image URL
+  → gatekeeper() → validate text+image
+  → send_to_approval() → POST :8791/preview
+
+linkedin_webhook.py (Docker, always running)
+  → receives TG callback from Tim (✅/❌)
+  → on approve: publish_linkedin()
+    → LinkedIn API: register image upload → PUT image → ugcPosts
+    → NO first comment with link (gap vs strategy s01)
+  → on reject: mark rejected, allow retry
+
+card_renderer.py (systemd, always running)
+  → HTTP :8792, renders HTML→PNG via Playwright
+  → 3 card types: branded, data, quote
+  → Pexels background photos
+```
+
+### 2. Current Input/Output Model
+
+**Input (what pipeline expects):**
+- Topic from TOPICS array (pillar, topic, search query, card_type)
+- Web data from Google News RSS
+- MiniMax API key
+- Pexels API key
+
+**Output (what pipeline produces):**
+- Text: 800-1500 chars RU, LinkedIn-specific prompt rules
+- Image: PNG card uploaded to catbox.moe
+- Preview: sent to Approval Bot with text+image+post_id
+- Post: published via ugcPosts API (after Tim approval)
+- State: state.json (topic rotation), post_history.json, counter.json
+
+**NOT connected to:**
+- content.posts
+- content.platform_posts
+- content bank
+- Scout/Writer/Adapter output
+
+### 3. Comment-with-Link Gap
+
+**Strategy (s01):** ссылка в первом комментарии, не в теле
+**Reality:** publish_linkedin() does ugcPosts only. **No comment step.** No link in comment.
+**Gatekeeper:** checks "no links in text body" (correct) but no follow-up comment.
+
+### 4. Integration Options Compared
+
+**Option A: content.posts → LinkedIn pipeline (recommended)**
+- LinkedIn pipeline reads from content.posts (WHERE topic_cluster matches LinkedIn interests)
+- Pipeline adapts text with own MiniMax call (keeps LinkedIn-specific prompt, slang, anti-AI rules)
+- Card renderer stays as-is
+- Approval flow stays as-is
+- Add: first comment with link after publish
+- **Complexity:** LOW — change ~30 lines in linkedin_pipeline.py (replace TOPICS with DB query)
+- **Risk:** LOW — everything else stays the same
+- **Migration cost:** ~1 sprint
+- **Operational clarity:** HIGH — content bank feeds LinkedIn, LinkedIn pipeline does the rest
+
+**Option B: exported queue/file → LinkedIn pipeline**
+- Write scheduled LinkedIn posts to /opt/linkedin-pipeline/queue.json
+- Pipeline reads from queue instead of TOPICS
+- **Complexity:** LOW — but adds file-based handoff (fragile)
+- **Risk:** MEDIUM — file sync issues, no DB consistency
+- **Not recommended** unless DB access is problematic
+
+### 5. Recommended First Implementation Sprint (after 4G)
+
+**Sprint 4G.impl — LinkedIn Content Bank Connection**
+- **Scope:** modify linkedin_pipeline.py to read from content.posts
+- **Exact changes:**
+  - Replace `pick_topic()` → query content.posts for LinkedIn-ready posts
+  - OR: read from content.platform_posts WHERE platform='linkedin'
+  - Keep MiniMax adaptation call (LinkedIn-specific prompt stays)
+  - Keep card renderer, approval flow, ugcPosts path
+  - Add: first comment with link (using LinkedIn ugcPosts comment API)
+- **Non-goals:** migration to Publisher v3, changing approval flow, changing card renderer
+- **Files to change:** `/opt/linkedin-pipeline/linkedin_pipeline.py` (~30-50 lines)
+- **Risk:** LinkedIn OAuth token may need refresh. Verify before implementation.
+
+---
+
 ## [2026-03-23 02:30 Istanbul] Claude — Sprint 4G LinkedIn System Audit
 **Directive read:** [2026-03-23 02:15 Istanbul] Codex — START 4G research-only
 
