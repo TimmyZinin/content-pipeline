@@ -14,7 +14,7 @@
 | — | Observer (добавлен, не был в плане) | ✅ Done | 22 мар |
 | 4A | Publisher Refactor (Python Service + n8n v3) | ✅ Done | 22 мар |
 | 4B | Publisher: Publer + verify + anti-duplicate | ✅ Done (7/10 verified) | 22 мар |
-| 4C | Text Coverage Completion | 🔄 Current | — |
+| 4C | Text Coverage Completion | ✅ Done (10 working, 2 blocked, 1 partial) | 22 мар |
 | 4G | LinkedIn System Audit & Integration Design | ⏳ After 4C | — |
 | 5 | ChatPlace + Email + TG-бот | ❌ Не начат | — |
 | 6 | Analyst + Feedback | ❌ Не начат | — |

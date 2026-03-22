@@ -44,16 +44,14 @@ graph TD
 | 9 | Dev.to | EN | 1/нед (ПН) | 19:15 | Direct adapter | ✅ Verified (API) |
 | 10 | Hashnode | EN | 1/нед (ПН) | 19:30 | Direct adapter (GraphQL) | ✅ Verified (API) |
 
-## Подключены в Adapter, но нет Publisher (Sprint 3, 22 мар)
+## Подключены в Sprint 4C
 
-| # | Платформа | Язык | Частота | Время (Istanbul) | Адаптер | Publisher |
-|---|-----------|------|---------|-----------------|---------|----------|
-| 11 | Write.as | EN | 1/нед (ПН) | 23:00 | ✅ writeas.py | ❌ Нет |
-| 12 | Tumblr | EN | ПН/СР/ПТ | 23:15 | ✅ tumblr.py | ❌ Нет |
-| 13 | Minds | EN | ПН/СР/ПТ | 23:15 | ✅ minds.py | ❌ Нет |
-| 14 | Nostr | EN | ПН/СР/ПТ | 23:30 | ✅ nostr.py | ❌ Нет |
-
-> Все времена Istanbul (UTC+3). Adapter создаёт адаптации, Curator назначает расписание, но Publisher ещё не может публиковать на эти платформы. Будет решено в Sprint 4 (Python Publisher Service).
+| # | Платформа | Язык | Частота | Время (Istanbul) | Publisher v3 статус |
+|---|-----------|------|---------|-----------------|---------------------|
+| 11 | Write.as | EN | 1/нед (ПН) | 23:00 | ✅ Working (text verified) |
+| 12 | Tumblr | EN | ПН/СР/ПТ | 23:15 | ❌ Blocked (401 Unauthorized — OAuth tokens expired) |
+| 13 | Minds | EN | ПН/СР/ПТ | 23:15 | ✅ Working (text verified) |
+| 14 | Nostr | EN | ПН/СР/ПТ | 23:30 | ✅ Working (text verified) |
 
 ## Не подключены (бэклог)
 

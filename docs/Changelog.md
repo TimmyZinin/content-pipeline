@@ -4,6 +4,23 @@
 
 ---
 
+## 2026-03-22 | Sprint 4C: Text Coverage Completion
+- Bluesky: text verified (5/5 tests), image blocked (blob >1MB, platform limit)
+- Write.as: ✅ working, verified via /test-publish
+- Minds: ✅ working, verified via /test-publish
+- Nostr: ✅ working, verified via /test-publish (websocket-client + coincurve installed)
+- Tumblr: ❌ blocked (401 Unauthorized — OAuth tokens expired/invalid)
+- Mastodon: ❌ blocked (401 Unauthorized — access token invalid)
+- Tumblr adapter rewritten as proper module (was standalone script)
+- Docker deps: +pytumblr +coincurve +websocket-client
+- .env mounted into Docker for adapters that read credentials from file
+
+Final text publish map:
+- Working (10): Telegram, Dev.to, VK, Threads RU, Hashnode, Facebook, Threads EN, Write.as, Minds, Nostr
+- Partial: Bluesky (text ok, image >1MB blocked)
+- Blocked: Tumblr (401), Mastodon (401)
+- Separate path: LinkedIn
+
 ## 2026-03-22 | Sprint 4B.1: Verification Truth Pass
 - Facebook via Publer: TEXT ONLY verified. Image NOT transmitted (verified by Tim in Publer app)
 - Threads EN via Publer: TEXT ONLY verified. Image NOT transmitted (verified by Tim in Threads app)
