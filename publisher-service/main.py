@@ -351,8 +351,9 @@ PUBLISH_ALLOWLIST = [p.strip() for p in os.getenv("PUBLISH_ALLOWLIST", "telegram
 
 
 def _update_post_status(post_id: int, status: str, external_id: str | None = None,
-                        error: str | None = None, retries: int | None = None) -> None:
-    """Update platform_post status in DB. Publisher Service = owner of status transitions."""
+                        error: str | None = None) -> bool:
+    """Update platform_post status in DB. Publisher Service = owner of status transitions.
+    Returns True if DB update succeeded, False otherwise."""
     conn = get_db()
     try:
         cur = conn.cursor()
@@ -362,15 +363,16 @@ def _update_post_status(post_id: int, status: str, external_id: str | None = Non
                 (external_id or "", post_id)
             )
         elif status == "failed":
-            safe_error = (error or "unknown")[:500].replace("'", "''")
             cur.execute(
                 "UPDATE content.platform_posts SET status = 'failed', error = %s, retries = COALESCE(retries, 0) + 1 WHERE id = %s;",
-                (safe_error, post_id)
+                ((error or "unknown")[:500], post_id)
             )
         conn.commit()
+        return True
     except Exception as e:
         log.error(f"DB update failed for post {post_id}: {e}")
         conn.rollback()
+        return False
     finally:
         conn.close()
 
@@ -406,9 +408,18 @@ def publish_endpoint(req: PublishRequest):
 
     # Publisher Service = owner of final status transition
     if result.status == "ok":
-        _update_post_status(req.platform_post_id, "sent", external_id=result.external_id)
+        db_ok = _update_post_status(req.platform_post_id, "sent", external_id=result.external_id)
     else:
-        _update_post_status(req.platform_post_id, "failed", error=result.error)
+        db_ok = _update_post_status(req.platform_post_id, "failed", error=result.error)
+
+    if not db_ok:
+        # DB update failed — post stuck in 'sending'. Report error to caller.
+        log.error(f"CRITICAL: DB status update failed for post {req.platform_post_id}. Post stuck in 'sending'.")
+        return PublishResult(
+            status="error", platform=result.platform, post_id=result.post_id,
+            external_id=result.external_id,
+            error=f"Published but DB update failed. Post stuck in 'sending'. Manual fix required."
+        )
 
     return result
 
