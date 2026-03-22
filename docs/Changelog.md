@@ -4,6 +4,14 @@
 
 ---
 
+## 2026-03-22 | Hardening + Staged Rollout
+- Body-link hardening: Bluesky/Nostr char limit guard, Dev.to/Hashnode markdown CTA block
+- Platform allowlist: PUBLISH_ALLOWLIST env var (default: telegram,writeas,minds)
+- Non-allowlisted platforms return 403 ROLLOUT GUARD
+- Publisher v3 reactivated with allowlist protection
+- Test posts 22 mar left as-is, analytics for this day polluted
+- Staged rollout: Phase 1 = telegram, writeas, minds only
+
 ## 2026-03-22 | CTA/Link Placement Audit + Incident Containment
 - /test-publish DISABLED (HTTP 403) — was publishing to real accounts
 - Strategy audit: CTA placement matrix for all platforms (new doc: CTA-Placement.md)
