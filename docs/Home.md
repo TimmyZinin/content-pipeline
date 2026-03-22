@@ -29,7 +29,7 @@ flowchart LR
     W --> I[Illustrator ✅]
     I --> A[Adapter ✅\n14 платформ]
     A --> C[Curator ✅\nTier + dedup]
-    C --> P[Publisher v3\n10 working]
+    C --> P[Publisher v3\nPhase 1: TG+WA+Minds]
     P --> AN[Analyst ❌]
     AN --> F[Feedback ❌]
 ```

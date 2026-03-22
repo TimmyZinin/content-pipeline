@@ -133,10 +133,11 @@ flowchart LR
 **Python Publisher Service:** Docker :8086 (internal :8085), reads post by ID from DB, calls auto-publisher adapter
 **Модель:** `scheduled → sending (lock) → sent (API ok) → verified (/verify)` / `→ failed (retry 3x → TG alert)`
 **Anti-duplicate:** atomic lock через `sending` status, отказ при повторном вызове
-**Working (10):** Telegram, Dev.to, VK, Threads RU, Hashnode, Facebook (Publer), Threads EN (Publer), Write.as, Minds, Nostr
-**Partial:** Bluesky (text 5/5 ok, image blocked >1MB)
+**Current rollout (Phase 1):** telegram, writeas, minds
+**Historically verified capability (10):** Telegram, Dev.to, VK, Threads RU, Hashnode, Facebook (Publer), Threads EN (Publer), Write.as, Minds, Nostr
+**Partial capability:** Bluesky (text ok, image >1MB blocked)
 **Blocked:** Tumblr (401 OAuth), Mastodon (401 token)
-**Separate:** LinkedIn (own pipeline)
+**Separate pipeline:** LinkedIn
 **/verify:** endpoint для external read-back (6 платформ)
 **Подробнее:** [[Publisher]]
 

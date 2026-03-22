@@ -101,9 +101,9 @@ scheduled → sending → failed (после 3 retry)
 | Bluesky | ⚠️ text verified (5/5) | at://... | Text ok, image blocked (>1MB blob limit) |
 | Facebook | ✅ sent (text+image) | Publer job_id | Personal profile через Publer. 2-step media upload. Verified by Tim |
 | Threads EN | ✅ sent (text+image) | threads.com/@timzinin_en/... | Через Publer. 2-step media upload. Verified by Tim |
-| Write.as | ✅ sent | 9kmx5xof89omds5g | Verified via /test-publish (Sprint 4C) |
-| Minds | ✅ sent | 1882500900157657088 | Verified via /test-publish (Sprint 4C) |
-| Nostr | ✅ sent | 92928e1a... | Verified via /test-publish (Sprint 4C) |
+| Write.as | ✅ sent | 9kmx5xof89omds5g | Historically verified during manual tests 22 mar |
+| Minds | ✅ sent | 1882500900157657088 | Historically verified during manual tests 22 mar |
+| Nostr | ✅ sent | 92928e1a... | Historically verified during manual tests 22 mar |
 | Tumblr | ❌ blocked | — | 401 OAuth expired. Adapter rewritten, credential needs refresh |
 | Mastodon | ❌ blocked | — | 401 token invalid |
 | LinkedIn | ⚡ separate | — | Own pipeline (/opt/linkedin-pipeline/). Not in Publisher v3 |
