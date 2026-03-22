@@ -4,6 +4,16 @@
 
 ---
 
+## 2026-03-22 | Sprint 4B: 8/10 platforms via Publisher Service
+- Facebook via Publer: ✅ sent (personal profile, not Page)
+- Threads EN via Publer: ✅ sent (https://www.threads.com/@timzinin_en/post/DWMWUIKjfKq)
+- Publer integration: User-Agent fix (Python urllib blocked by Publer without it)
+- Publer API: POST /posts/schedule/publish + Publer-Workspace-Id header + job polling
+- Publisher Service: facebook → _publer (personal profile), threads_en → _publer
+- LinkedIn: no adapter in auto-publisher, separate /opt/linkedin-autopub/. Deferred
+- Mastodon: token invalid. Deferred
+- Total: 8/10 platforms working through Publisher Service
+
 ## 2026-03-22 | Sprint 4B checkpoint: Anti-duplicate + Verify + Observer
 - Anti-duplicate guard: atomic lock (status='sending'), rejects sent/verified/published (400/409)
 - /verify endpoint: TG (trusted), Dev.to (API GET), VK (API wall.getById), Threads RU (Graph API), Hashnode (trusted), Bluesky (trusted)
