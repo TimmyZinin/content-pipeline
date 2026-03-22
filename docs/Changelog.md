@@ -13,11 +13,12 @@
 - LinkedIn: no adapter in auto-publisher. Deferred
 - Mastodon: token invalid. Deferred
 
-Honest platform status:
-- Full (text+image): Telegram, Dev.to, VK, Threads RU, Hashnode (5)
-- Text only: Facebook (Publer), Threads EN (Publer) (2)
+Honest platform status after media fix:
+- Full (text+image, verified by Tim): Telegram, Dev.to, VK, Threads RU, Hashnode, Facebook (Publer), Threads EN (Publer) (7)
 - Partial: Bluesky (1 test) (1)
 - Not working: LinkedIn, Mastodon (2)
+- Publer media fix: 2-step upload via POST /media/from-url → get media_id → reference in post with type:"photo"
+- Root cause of initial failure: Publer ignores inline media URLs, requires pre-uploaded media IDs
 
 ## 2026-03-22 | Sprint 4B checkpoint: Anti-duplicate + Verify + Observer
 - Anti-duplicate guard: atomic lock (status='sending'), rejects sent/verified/published (400/409)
