@@ -26,7 +26,30 @@ Schedule → Select Scheduled → Has Post? → Call Publisher → Update Status
 | POST | /test-publish | {platform, text, image_url?} | {status, platform, post_id, external_id, error} | **No** — safe test, no DB |
 | GET | /health | — | {status: "ok"} | No |
 
-**Safe testing:** `/test-publish` для ручного тестирования платформ. Не трогает БД, не может создать дубликаты. Используй вместо `/publish` при проверке новых адаптеров.
+**Safe testing:** `/test-publish` **ОТКЛЮЧЁН** (HTTP 403). Публиковал в реальные аккаунты. Для тестирования — только local adapter testing.
+
+### Staged Rollout (allowlist)
+
+**Primary filter:** SQL в n8n Publisher v3 workflow (Select Scheduled):
+```sql
+WHERE platform IN ('telegram','writeas','minds')
+```
+Неразрешённые платформы **не попадают** в Publisher вообще. Нет HTTP вызова, нет retry, нет шума.
+
+**Secondary guard:** `PUBLISH_ALLOWLIST` env var в Publisher Service. Если пост каким-то образом дошёл — 403 ROLLOUT GUARD.
+
+**Где живёт allowlist:**
+| Место | Что делает | Приоритет |
+|-------|-----------|-----------|
+| n8n Select Scheduled SQL | Фильтрует ДО HTTP вызова | Primary |
+| Publisher Service env var | Reject если прошёл мимо SQL | Secondary |
+| docs/Publisher.md | Документация | Reference |
+
+**Расширение allowlist:** обновить **оба** места синхронно:
+1. n8n workflow SQL: `platform IN (...)`
+2. Contabo env: `PUBLISH_ALLOWLIST=...` + restart publisher-service
+
+**Текущий Phase 1:** telegram, writeas, minds
 
 **Anti-duplicate guard:** перед публикацией сервис атомарно ставит `status='sending'` через `UPDATE ... WHERE status IN ('scheduled','failed') RETURNING id`. Если пост уже `sent`, `verified`, `published` или `sending` — возвращает HTTP 400/409. Это предотвращает повторную публикацию при параллельных вызовах или ручном тестировании.
 

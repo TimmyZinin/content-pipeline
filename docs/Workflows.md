@@ -122,7 +122,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    CRON["Schedule\n*/30 09-03 Istanbul"] --> SQL["Select Scheduled\nLIMIT 1"]
+    CRON["Schedule\n*/30 09-03 Istanbul"] --> SQL["Select Scheduled\nLIMIT 1\nWHERE platform IN allowlist"]
     SQL --> IF1{"Has Post?"}
     IF1 -->|Да| HTTP["Call Publisher\nPOST :8085/publish"]
     HTTP --> UPD["Update Status\nsent / failed + retry"]

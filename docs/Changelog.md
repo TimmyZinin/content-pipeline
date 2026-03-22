@@ -6,11 +6,13 @@
 
 ## 2026-03-22 | Hardening + Staged Rollout
 - Body-link hardening: Bluesky/Nostr char limit guard, Dev.to/Hashnode markdown CTA block
-- Platform allowlist: PUBLISH_ALLOWLIST env var (default: telegram,writeas,minds)
-- Non-allowlisted platforms return 403 ROLLOUT GUARD
-- Publisher v3 reactivated with allowlist protection
-- Test posts 22 mar left as-is, analytics for this day polluted
-- Staged rollout: Phase 1 = telegram, writeas, minds only
+- Allowlist PRIMARY: SQL upstream in n8n Select Scheduled (platform IN ...)
+- Allowlist SECONDARY: PUBLISH_ALLOWLIST env var in Publisher Service (403 guard)
+- Non-allowlisted platforms filtered BEFORE HTTP call — no retry/failed noise
+- Publisher v3 reactivated with dual allowlist protection
+- Test posts 22 mar left as-is, analytics for this day polluted — do not use as baseline
+- Staged rollout Phase 1: telegram, writeas, minds
+- /test-publish remains DISABLED (403)
 
 ## 2026-03-22 | CTA/Link Placement Audit + Incident Containment
 - /test-publish DISABLED (HTTP 403) — was publishing to real accounts
