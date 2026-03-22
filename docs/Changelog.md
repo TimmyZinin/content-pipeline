@@ -4,15 +4,20 @@
 
 ---
 
-## 2026-03-22 | Sprint 4B: 8/10 platforms via Publisher Service
-- Facebook via Publer: ✅ sent (personal profile, not Page)
-- Threads EN via Publer: ✅ sent (https://www.threads.com/@timzinin_en/post/DWMWUIKjfKq)
-- Publer integration: User-Agent fix (Python urllib blocked by Publer without it)
-- Publer API: POST /posts/schedule/publish + Publer-Workspace-Id header + job polling
-- Publisher Service: facebook → _publer (personal profile), threads_en → _publer
-- LinkedIn: no adapter in auto-publisher, separate /opt/linkedin-autopub/. Deferred
+## 2026-03-22 | Sprint 4B.1: Verification Truth Pass
+- Facebook via Publer: TEXT ONLY verified. Image NOT transmitted (verified by Tim in Publer app)
+- Threads EN via Publer: TEXT ONLY verified. Image NOT transmitted (verified by Tim in Threads app)
+- Publer media: simple `media: [{url: "..."}]` does NOT work. Publer requires pre-uploaded media IDs
+- Bluesky: 1 successful text test, not a series. Honest confidence: partial
+- Publer integration: User-Agent fix, correct endpoint /posts/schedule/publish + Publer-Workspace-Id
+- LinkedIn: no adapter in auto-publisher. Deferred
 - Mastodon: token invalid. Deferred
-- Total: 8/10 platforms working through Publisher Service
+
+Honest platform status:
+- Full (text+image): Telegram, Dev.to, VK, Threads RU, Hashnode (5)
+- Text only: Facebook (Publer), Threads EN (Publer) (2)
+- Partial: Bluesky (1 test) (1)
+- Not working: LinkedIn, Mastodon (2)
 
 ## 2026-03-22 | Sprint 4B checkpoint: Anti-duplicate + Verify + Observer
 - Anti-duplicate guard: atomic lock (status='sending'), rejects sent/verified/published (400/409)

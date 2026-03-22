@@ -67,8 +67,8 @@ scheduled → sending → failed (после 3 retry)
 | Threads RU | ✅ sent | 17992609448939339 | Двухшаговый API (create+publish) |
 | Hashnode | ✅ sent | 69c0062180048b76fe51c505 | GraphQL mutation |
 | Bluesky | ✅ sent (1 test) | at://...3mhnuulnbph2x | Адаптер работает. Ранее 400 при тексте >300 chars с em-dash |
-| Facebook | ✅ sent | Publer job_id | Personal profile через Publer (не Page API) |
-| Threads EN | ✅ sent | threads.com/@timzinin_en/... | Через Publer API |
+| Facebook | ⚠️ text only | Publer job_id | Personal profile через Publer. Текст проходит, картинки НЕ передаются |
+| Threads EN | ⚠️ text only | threads.com/@timzinin_en/... | Через Publer. Текст проходит, картинки НЕ передаются |
 
 ### Не тестировались в 4A
 | Платформа | Причина | Когда |
