@@ -1,20 +1,22 @@
 # Publisher — Публикатор
 
-## Текущее состояние (v3) — Sprint 4A/4B/4C
+## Текущее состояние (v3) — Sprint 4D
 
 ### Publisher v3 (n8n)
 **n8n ID:** ErbbScuvxWHLX1np
 **Cron:** */30 09:00-03:00 Istanbul (UTC+3)
-**Статус:** Active
+**Статус:** Active (staged rollout)
 
 7 нод:
 ```
-Schedule → Select Scheduled → Has Post? → Call Publisher → Update Status → Dead Letter? → TG Alert
+Schedule → Select Scheduled (SQL allowlist) → Has Post? → Call Publisher → Check Result (pass-through) → Dead Letter? → TG Alert
 ```
+
+**n8n role = orchestration only.** Не пишет sent/failed в БД. Только: select, call, check, retry, alert.
 
 ### Python Publisher Service
 **URL:** http://publisher-service:8085 (Docker, Contabo :8086 external)
-**Source:** /opt/publisher-service/main.py
+**Canonical source:** content-pipeline/publisher-service/main.py
 **Adapters:** /opt/auto-publisher/adapters/ (mounted read-only)
 **Credentials:** /opt/zinin-corp/.env (env_file в docker-compose)
 
@@ -114,11 +116,13 @@ scheduled → sending → failed (после 3 retry)
 
 **Что произошло:** Telegram и LinkedIn получили дублированные посты Zeroboot.
 
-**Root cause:** До внедрения anti-duplicate guard, ручной `curl POST /publish` ставил `sending` но при ошибке не переводил в `sent/failed` (это делает n8n Update Status нода). Пост оставался `scheduled` в БД, и publisher workflow отправлял его повторно. После fix: Publisher Service атомарно ставит `sending` перед публикацией — повторный вызов по тому же посту возвращает 409.
+**Root cause:** ручной `curl POST /publish` публиковал пост, но статус не обновлялся (n8n Update Status не вызывался). Пост оставался `scheduled`, и workflow повторял публикацию.
 
-**Что сделано:**
-- Publisher v2 деактивирован
-- Publisher v3 обновляет статус на `sent` сразу после успешного вызова
+**Что исправлено:**
+- Publisher Service теперь **сам пишет** `sent/failed` в БД (ownership fix)
+- n8n `Update Status` → `Check Result` (pass-through, не пишет в БД)
+- Anti-duplicate: atomic `sending` lock + 409 при повторном вызове
+- `/test-publish` отключён (HTTP 403)
 
 **Anti-duplicate measures:**
 
