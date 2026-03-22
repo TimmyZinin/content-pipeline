@@ -12,7 +12,10 @@
 | 3 | Adapter workflow (10 платформ) | ✅ Done | 21 мар |
 | — | Curator (добавлен, не был в плане) | ✅ Done | 22 мар |
 | — | Observer (добавлен, не был в плане) | ✅ Done | 22 мар |
-| 4 | Publisher + HITL | ⚠️ Сделан криво | 22 мар |
+| 4A | Publisher Refactor (Python Service + n8n v3) | ✅ Done | 22 мар |
+| 4B | Publisher: Publer + verify + anti-duplicate | ✅ Done (7/10 verified) | 22 мар |
+| 4C | Text Coverage Completion | 🔄 Current | — |
+| 4G | LinkedIn System Audit & Integration Design | ⏳ After 4C | — |
 | 5 | ChatPlace + Email + TG-бот | ❌ Не начат | — |
 | 6 | Analyst + Feedback | ❌ Не начат | — |
 
@@ -62,6 +65,48 @@ Bottleneck всей системы — Publisher работает на 2/10 пл
 | PUB-6 | Все 10 платформ | HIGH | TG, LinkedIn, Threads RU/EN, VK, Bluesky, FB, Mastodon, Dev.to, Hashnode |
 | PUB-7 | Credentials в n8n | MED | Токены из Code нод → n8n Credentials store. Python сервис читает из .env |
 | PUB-8 | Observer: Publication Log | MED | Секция в Observer: последние 20 публикаций с результатом (success/error/retry) |
+
+## Sprint 4C: Text Coverage Completion (CURRENT)
+
+Добить все текстовые платформы до честного статуса в Publisher v3.
+
+| # | Задача | Платформа | Описание |
+|---|--------|-----------|----------|
+| 4C-1 | Bluesky hardening | Bluesky | Серия тестов (text, text+image, длинный текст). Довести до verified или зафиксировать ограничения |
+| 4C-2 | Mastodon credential | Mastodon | Проверить/восстановить токен. Если удастся — тест через /test-publish |
+| 4C-3 | Tumblr | Tumblr | Адаптер есть в auto-publisher. Подключить в Publisher Service, тест через /test-publish |
+| 4C-4 | Write.as | Write.as | Адаптер есть. Подключить, тест |
+| 4C-5 | Minds | Minds | Адаптер есть. Подключить, тест |
+| 4C-6 | Nostr | Nostr | Адаптер есть. Подключить, тест |
+
+**НЕ входит:** LinkedIn, video channels, Sprint 5, Sprint 6.
+**LinkedIn правило:** не трогать, не писать адаптер, не тестировать.
+
+**Definition of Done:** для каждой платформы — один из статусов:
+- working (verified)
+- blocked (explicit reason)
+- separate owned path
+- intentionally out of scope
+
+## Sprint 4G: LinkedIn System Audit & Integration Design (AFTER 4C)
+
+**Исследовательский спринт, НЕ implementation.**
+
+Цель: понять как безопасно подключить LinkedIn к общему content bank без дублей.
+
+Вопросы для ответа:
+1. Где живёт текущий LinkedIn publisher
+2. Что именно он публикует
+3. Откуда берёт контент
+4. Какой approval flow
+5. Какой image flow
+6. Какой scheduler/trigger/runtime
+7. Можно ли безопасно подключить к content bank
+8. Целевая архитектура: отдельный publisher + content bank source, migration в v3, или гибрид
+
+**Гипотеза:** LinkedIn лучше оставить отдельным specialized publisher, но подключить к общему content bank как source of content. Единый source, но не обязательно единый transport.
+
+---
 
 ## Спринт 5: Дистрибуция + Воронка
 
