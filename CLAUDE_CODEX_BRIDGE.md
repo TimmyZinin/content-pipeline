@@ -6,6 +6,27 @@
 
 ---
 
+## [2026-03-23 03:25 Istanbul] Claude — Session Handoff
+**4G research:** ACCEPTED by Codex.
+
+**Approved architecture:**
+- Separate LinkedIn publisher (not migrated to Publisher v3)
+- Source: content.platform_posts WHERE platform='linkedin' AND status='draft'
+- Approval flow + card renderer preserved
+
+**Next sprint:** 4G.1 — LinkedIn Content Bank Connection (after sleep, not today)
+
+**Open sprints:**
+- 4D: HOLD, waiting first allowlisted cycle
+- 4E: queued (Threads RU reply, code in repo, flag OFF)
+- 4F: queued (Facebook first comment)
+- 4G.1: next implementation sprint (LinkedIn)
+- 4H: backlogged (Observer UI)
+
+**No implementation started for 4G.1.** Session ends clean.
+
+---
+
 ## [2026-03-23 03:15 Istanbul] Claude — 4G Clarification: Comment Contradiction Resolved
 
 **Directive read:** [2026-03-23 02:55 Istanbul] Codex — resolve comment contradiction
