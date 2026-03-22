@@ -37,7 +37,7 @@ graph TD
 | 2 | Threads RU @timzinin | RU | 5/день | 10-18:00 | Direct adapter (2-step) | ✅ Verified (API) |
 | 3 | Threads EN | EN | 5/день | 10-18:00 | Publer 2-step media | ✅ Verified (Tim external) |
 | 4 | LinkedIn | RU | 1/день ПН/СР/ПТ | 10:00 | **Separate pipeline** | ⚡ Не в Publisher v3. Отдельный owned path |
-| 5 | Bluesky | EN | 3/день | 11:00, 15:00, 19:00 | Direct adapter | ⚠️ Partial (1 text test) |
+| 5 | Bluesky | EN | 3/день | 11:00, 15:00, 19:00 | Direct adapter | ⚠️ Text verified (5/5), image blocked (>1MB) |
 | 6 | Mastodon | EN | 1/день | 19:00 | Direct adapter | ❌ Blocked (токен невалиден) |
 | 7 | VK | RU | 1/день ПН/СР/ПТ | 16:00 | Direct adapter (community wall) | ✅ Verified (API + Tim external) |
 | 8 | Facebook | RU | 1/день ПН/СР/ПТ | 16:00 | Publer 2-step media (personal) | ✅ Verified (Tim external) |

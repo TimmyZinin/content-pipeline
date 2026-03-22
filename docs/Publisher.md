@@ -1,6 +1,6 @@
 # Publisher — Публикатор
 
-## Текущее состояние (v3) — Sprint 4A + 4B checkpoint
+## Текущее состояние (v3) — Sprint 4A/4B/4C
 
 ### Publisher v3 (n8n)
 **n8n ID:** ErbbScuvxWHLX1np
@@ -69,18 +69,15 @@ scheduled → sending → failed (после 3 retry)
 | VK | ✅ sent (text+image) | 351 | wall.post в сообщество (group 229813427). Target = community wall |
 | Threads RU | ✅ sent | 17992609448939339 | Двухшаговый API (create+publish) |
 | Hashnode | ✅ sent | 69c0062180048b76fe51c505 | GraphQL mutation |
-| Bluesky | ✅ sent (1 test) | at://...3mhnuulnbph2x | Адаптер работает. Ранее 400 при тексте >300 chars с em-dash |
+| Bluesky | ⚠️ text verified (5/5) | at://... | Text ok, image blocked (>1MB blob limit) |
 | Facebook | ✅ sent (text+image) | Publer job_id | Personal profile через Publer. 2-step media upload. Verified by Tim |
 | Threads EN | ✅ sent (text+image) | threads.com/@timzinin_en/... | Через Publer. 2-step media upload. Verified by Tim |
-
-### Не тестировались в 4A
-| Платформа | Причина | Когда |
-|-----------|---------|-------|
-| LinkedIn | Отдельный OAuth flow | Sprint 4B |
-| Facebook | Через Publer | Sprint 4B |
-| Threads EN | Через Publer | Sprint 4B |
-| Mastodon | Токен невалиден | Sprint 4B (если credential восстановлен) |
-| Tumblr, Write.as, Minds, Nostr | Новые в Adapter | Sprint 4B |
+| Write.as | ✅ sent | 9kmx5xof89omds5g | Verified via /test-publish (Sprint 4C) |
+| Minds | ✅ sent | 1882500900157657088 | Verified via /test-publish (Sprint 4C) |
+| Nostr | ✅ sent | 92928e1a... | Verified via /test-publish (Sprint 4C) |
+| Tumblr | ❌ blocked | — | 401 OAuth expired. Adapter rewritten, credential needs refresh |
+| Mastodon | ❌ blocked | — | 401 token invalid |
+| LinkedIn | ⚡ separate | — | Own pipeline (/opt/linkedin-pipeline/). Not in Publisher v3 |
 
 ---
 

@@ -66,27 +66,18 @@ Bottleneck всей системы — Publisher работает на 2/10 пл
 | PUB-7 | Credentials в n8n | MED | Токены из Code нод → n8n Credentials store. Python сервис читает из .env |
 | PUB-8 | Observer: Publication Log | MED | Секция в Observer: последние 20 публикаций с результатом (success/error/retry) |
 
-## Sprint 4C: Text Coverage Completion (CURRENT)
+## Sprint 4C: Text Coverage Completion (DONE)
 
-Добить все текстовые платформы до честного статуса в Publisher v3.
+Результат: все текстовые платформы получили честный статус.
 
-| # | Задача | Платформа | Описание |
-|---|--------|-----------|----------|
-| 4C-1 | Bluesky hardening | Bluesky | Серия тестов (text, text+image, длинный текст). Довести до verified или зафиксировать ограничения |
-| 4C-2 | Mastodon credential | Mastodon | Проверить/восстановить токен. Если удастся — тест через /test-publish |
-| 4C-3 | Tumblr | Tumblr | Адаптер есть в auto-publisher. Подключить в Publisher Service, тест через /test-publish |
-| 4C-4 | Write.as | Write.as | Адаптер есть. Подключить, тест |
-| 4C-5 | Minds | Minds | Адаптер есть. Подключить, тест |
-| 4C-6 | Nostr | Nostr | Адаптер есть. Подключить, тест |
-
-**НЕ входит:** LinkedIn, video channels, Sprint 5, Sprint 6.
-**LinkedIn правило:** не трогать, не писать адаптер, не тестировать.
-
-**Definition of Done:** для каждой платформы — один из статусов:
-- working (verified)
-- blocked (explicit reason)
-- separate owned path
-- intentionally out of scope
+| # | Платформа | Результат |
+|---|-----------|----------|
+| 4C-1 | Bluesky | Text 5/5 ok. Image blocked (>1MB blob limit) |
+| 4C-2 | Mastodon | ❌ Blocked (401 token invalid) |
+| 4C-3 | Tumblr | ❌ Blocked (401 OAuth expired). Adapter rewritten |
+| 4C-4 | Write.as | ✅ Working |
+| 4C-5 | Minds | ✅ Working |
+| 4C-6 | Nostr | ✅ Working |
 
 ## Sprint 4G: LinkedIn System Audit & Integration Design (AFTER 4C)
 
