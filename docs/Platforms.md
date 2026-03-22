@@ -31,18 +31,18 @@ graph TD
 
 ## Полная таблица
 
-| # | Платформа | Язык | Частота | Время (Istanbul UTC+3) | Метод | Publisher статус |
+| # | Платформа | Язык | Частота | Время (Istanbul UTC+3) | Метод | Publisher v3 статус |
 |---|-----------|------|---------|---------------|-------|----------------|
-| 1 | Telegram @timofeyzinin | RU | 2/день | 09:00, 14:00 | Direct API (Bot) | ✅ Работает |
-| 2 | Threads RU @timzinin | RU | 5/день | 10-18:00 | Direct API (Meta) | ⚠️ Двухшаговый |
-| 3 | Threads EN | EN | 5/день | 10-18:00 | Publer API | ⚠️ Не верифицирован |
-| 4 | LinkedIn | RU | 1/день ПН/СР/ПТ | 10:00 | Direct API (ugcPosts) | ⚠️ Не верифицирован |
-| 5 | Bluesky | EN | 3/день | 11:00, 15:00, 19:00 | Direct API | ⚠️ JSON bug |
-| 6 | Mastodon | EN | 1/день | 19:00 | Direct API | ❌ Токен невалиден |
-| 7 | VK | RU | 1/день ПН/СР/ПТ | 16:00 | Direct API (wall.post) | ⚠️ Формат запроса |
-| 8 | Facebook | RU | 1/день ПН/СР/ПТ | 16:00 | Publer API | ⚠️ Не верифицирован |
-| 9 | Dev.to | EN | 1/нед (ПН) | 19:15 | Direct API | ✅ Работает |
-| 10 | Hashnode | EN | 1/нед (ПН) | 19:30 | Direct API (GraphQL) | ⚠️ Не проверен |
+| 1 | Telegram @timofeyzinin | RU | 2/день | 09:00, 14:00 | Direct adapter | ✅ Verified (Tim external) |
+| 2 | Threads RU @timzinin | RU | 5/день | 10-18:00 | Direct adapter (2-step) | ✅ Verified (API) |
+| 3 | Threads EN | EN | 5/день | 10-18:00 | Publer 2-step media | ✅ Verified (Tim external) |
+| 4 | LinkedIn | RU | 1/день ПН/СР/ПТ | 10:00 | **Separate pipeline** | ⚡ Не в Publisher v3. Отдельный owned path |
+| 5 | Bluesky | EN | 3/день | 11:00, 15:00, 19:00 | Direct adapter | ⚠️ Partial (1 text test) |
+| 6 | Mastodon | EN | 1/день | 19:00 | Direct adapter | ❌ Blocked (токен невалиден) |
+| 7 | VK | RU | 1/день ПН/СР/ПТ | 16:00 | Direct adapter (community wall) | ✅ Verified (API + Tim external) |
+| 8 | Facebook | RU | 1/день ПН/СР/ПТ | 16:00 | Publer 2-step media (personal) | ✅ Verified (Tim external) |
+| 9 | Dev.to | EN | 1/нед (ПН) | 19:15 | Direct adapter | ✅ Verified (API) |
+| 10 | Hashnode | EN | 1/нед (ПН) | 19:30 | Direct adapter (GraphQL) | ✅ Verified (API) |
 
 ## Подключены в Adapter, но нет Publisher (Sprint 3, 22 мар)
 

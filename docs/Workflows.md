@@ -20,7 +20,7 @@
 
 | Workflow | n8n ID | Причина |
 |---------|--------|---------|
-| LinkedIn Pipeline v3 | umId4uV39dewR8Um | Заменён Publisher v3 |
+| LinkedIn Pipeline v3 (n8n) | umId4uV39dewR8Um | Деактивирован в n8n. LinkedIn живёт отдельным standalone pipeline (/opt/linkedin-pipeline/) |
 | Threads News | JHZEnMf87VLN93pI | Заменён Publisher v3 |
 | Publisher v2 | 1cD3qXs2XZkgcQyt | Заменён Publisher v3 (дубликаты, нет картинок) |
 

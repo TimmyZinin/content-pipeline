@@ -10,7 +10,7 @@
 - Publer media: simple `media: [{url: "..."}]` does NOT work. Publer requires pre-uploaded media IDs
 - Bluesky: 1 successful text test, not a series. Honest confidence: partial
 - Publer integration: User-Agent fix, correct endpoint /posts/schedule/publish + Publer-Workspace-Id
-- LinkedIn: no adapter in auto-publisher. Deferred
+- LinkedIn: separate standalone pipeline (/opt/linkedin-pipeline/), not migrated into Publisher v3
 - Mastodon: token invalid. Deferred
 
 Honest platform status after media fix:
