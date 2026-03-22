@@ -4,6 +4,17 @@
 
 ---
 
+## 2026-03-22 | Sprint 4A: Publisher Refactor
+- Python Publisher Service deployed (Docker :8086, FastAPI)
+- Reads platform_post by ID from DB, calls auto-publisher adapters
+- Publisher v3 (ErbbScuvxWHLX1np): 7 n8n nodes, replaces v2
+- Old Publisher v2 (1cD3qXs2XZkgcQyt) DEACTIVATED
+- Status model: scheduled → sent (API ok) / failed (retry 3x, TG alert)
+- Verified platforms: Telegram, Dev.to, VK, Threads RU, Hashnode (5/5)
+- Bluesky: known adapter bug (apostrophes), deferred to 4B
+- Observer: Publication Log section added (sent/failed with details)
+- INCIDENT: duplicate posts to TG and LinkedIn caused by manual /publish without status update. Fixed: v2 deactivated, v3 updates status. Rule: no manual curl /publish on prod scheduled posts.
+
 ## 2026-03-22 | Reconciliation Pass
 - docs/Home.md: добавлен Observer, policies (SoT, timezone, DoD), связанные репо
 - docs/Workflows.md: добавлен Observer workflow (#9) с описанием секций

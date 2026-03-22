@@ -11,7 +11,7 @@
 | 3 | Illustrator — Художник | Z94O5uyaFEmrYGIJ | 06:30 Istanbul | ✅ Active |
 | 4 | Adapter — Адаптер | NJoPcdp38ZU0dQwG | 07:00 Istanbul | ✅ Active |
 | 5 | Curator — Куратор | EYPcT5B4rLmQRQBM | 07:30 Istanbul | ✅ Active |
-| 6 | Publisher v2 — Публикатор | 1cD3qXs2XZkgcQyt | */30 09:00-00:00 Istanbul | ⚠️ Partial |
+| 6 | Publisher v3 | ErbbScuvxWHLX1np | */30 09:00-03:00 Istanbul | ✅ Active (5/10) |
 | 7 | Dashboard — Дашборд | DC3a34HOedbU7rVb | webhook | ✅ Active |
 | 8 | Curator Preview | JzYcKrUfXheatEi1 | webhook | ✅ Active |
 | 9 | Observer — Наблюдатель | V2wnna7ACw5iSqdi | webhook | ✅ Active |
@@ -20,8 +20,9 @@
 
 | Workflow | n8n ID | Причина |
 |---------|--------|---------|
-| LinkedIn Pipeline v3 | umId4uV39dewR8Um | Заменён Publisher v2 |
-| Threads News | JHZEnMf87VLN93pI | Заменён Publisher v2 |
+| LinkedIn Pipeline v3 | umId4uV39dewR8Um | Заменён Publisher v3 |
+| Threads News | JHZEnMf87VLN93pI | Заменён Publisher v3 |
+| Publisher v2 | 1cD3qXs2XZkgcQyt | Заменён Publisher v3 (дубликаты, нет картинок) |
 
 ## Кнопочные workflows (ручной запуск)
 
@@ -115,23 +116,25 @@ flowchart LR
 
 ---
 
-## 6. Publisher v2 — Публикатор
+## 6. Publisher v3
+
+**n8n ID:** ErbbScuvxWHLX1np (заменил v2: 1cD3qXs2XZkgcQyt)
 
 ```mermaid
 flowchart LR
-    CRON["Cron */30\n09-03 Istanbul"] --> SQL["WHERE status=scheduled\nAND scheduled_at <= NOW()\nLIMIT 1"]
-    SQL --> CODE["Подготовка API\nurl + body + headers"]
-    CODE --> HTTP["HTTP Request"]
-    HTTP --> IF{"2-й шаг?"}
-    IF -->|Threads RU| THREADS["Threads Publish"]
-    IF -->|Bluesky| BSKY["Bluesky Post"]
-    IF -->|Нет| UPDATE["status = published"]
-    THREADS & BSKY --> UPDATE
+    CRON["Schedule\n*/30 09-03 Istanbul"] --> SQL["Select Scheduled\nLIMIT 1"]
+    SQL --> IF1{"Has Post?"}
+    IF1 -->|Да| HTTP["Call Publisher\nPOST :8085/publish"]
+    HTTP --> UPD["Update Status\nsent / failed + retry"]
+    UPD --> IF2{"Dead Letter?\nretries >= 3"}
+    IF2 -->|Да| TG["TG Alert"]
 ```
 
-**Текущий статус:** 2 платформы верифицированы (TG, Dev.to), 8 не верифицированы или сломаны
-**Текущая модель:** `scheduled → published` (UPDATE без внешней проверки)
-**Sprint 4:** рефакторинг через Python HTTP сервис + новая модель `scheduled → sent → verified/failed`
+**Python Publisher Service:** Docker :8086 (internal :8085), reads post by ID from DB, calls auto-publisher adapter
+**Модель:** `scheduled → sent` (API ok) / `scheduled → failed` (retry 3x → TG alert)
+**Verified:** Telegram, Dev.to, VK, Threads RU, Hashnode (5/5)
+**Bluesky:** known bug (адаптер), fix в 4B
+**Подробнее:** [[Publisher]]
 
 ---
 
@@ -172,6 +175,7 @@ flowchart LR
 | Platform Summary | Таблица: платформа × статус (draft/scheduled/published/skipped/failed) |
 | Schedule | Расписание постов с временем (Istanbul), quality score, topic cluster |
 | Recent Published | Последние 10 опубликованных постов |
+| Publication Log | Последние 20 попыток публикации: sent/verified/failed с external ID и ошибками (Sprint 4A) |
 
 **Ссылки на Observer:**
 - corp.timzinin.com → sidebar → Observer (PIPELINE)
