@@ -55,7 +55,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    CRON["Cron 03:00"] --> SQL["TOP-5 неиспользованных\nновостей по score"]
+    CRON["Cron 06:00 Istanbul"] --> SQL["TOP-5 неиспользованных\nновостей по score"]
     SQL --> LLM["MiniMax M2.5\n700-1200 символов RU\nx5 постов"]
     LLM --> QG["Quality Gate\n12 проверок\nscore >= 65"]
     QG --> DB["content.posts"]
@@ -72,7 +72,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    CRON["Cron 03:30"] --> SQL["Посты без картинок"]
+    CRON["Cron 06:30 Istanbul"] --> SQL["Посты без картинок"]
     SQL --> GEMINI["Gemini 2.5 Flash\nDocker :8800\npop-art стиль"]
     GEMINI --> DB["content.posts\n+ image_url"]
 ```
@@ -87,7 +87,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    CRON["Cron 04:00"] --> SQL["Неадаптированные посты"]
+    CRON["Cron 07:00 Istanbul"] --> SQL["Неадаптированные посты"]
     SQL --> LLM["MiniMax M2.5\n10 платформ"]
     LLM --> DB["content.platform_posts\nпост + комментарий\n+ reply + ссылка"]
     DB --> SYNC["Синхронизация\nDashboard"]
@@ -103,7 +103,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    CRON["Cron 04:30"] --> SQL["Все draft посты\n+ quality_score\n+ topic_cluster"]
+    CRON["Cron 07:30 Istanbul"] --> SQL["Все draft посты\n+ quality_score\n+ topic_cluster"]
     SQL --> CODE["Распределение по Tier\n+ дедупликация\n+ stagger scheduling"]
     CODE --> UPDATE["scheduled_at\nstatus = scheduled|skipped"]
 ```
