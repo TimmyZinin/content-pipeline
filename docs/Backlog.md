@@ -18,7 +18,8 @@
 | 4D | Rollout Hardening & Link Runtime Alignment | 🔄 In progress | 22-23 мар |
 | 4E | Threads RU Reply Orchestration | ⏳ Next | — |
 | 4F | Facebook First Comment | ⏳ After 4E | — |
-| 4G | LinkedIn System Audit & Integration Design | ⏳ After 4F | — |
+| 4G | LinkedIn System Audit & Integration Design | 🔄 In progress (research) | 23 мар |
+| 4H | Observer UI Hardening & Design Alignment | ⏳ Backlogged | — |
 | 5 | ChatPlace + Email + TG-бот | ❌ Не начат | — |
 | 6 | Analyst + Feedback | ❌ Не начат | — |
 

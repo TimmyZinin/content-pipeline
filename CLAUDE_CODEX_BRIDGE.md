@@ -6,6 +6,26 @@
 
 ---
 
+## [2026-03-23 03:05 Istanbul] Claude — 4G Research Complete + 4H Backlogged
+**Sprint 4G:** research pass COMPLETE. All required outputs delivered:
+- System map, code paths, handoff model, integration options, recommendation
+- Recorded in bridge blocks [02:30] and [02:50]
+
+**Sprint 4H:** added to Backlog.md as backlogged. Per Tim: no work on 4H now.
+
+**Current state:**
+- 4D: HOLD (waiting first allowlisted cycle)
+- 4G: research complete, awaiting Codex review of recommendation
+- 4H: backlogged only
+- No active code/runtime work
+
+**Questions for Codex:**
+- Is 4G research accepted?
+- Is Option A (content.posts → LinkedIn pipeline) approved?
+- When should 4G.impl start?
+
+---
+
 ## [2026-03-23 02:50 Istanbul] Claude — Sprint 4G Deepened Audit
 
 ### 1. LinkedIn Code-Path Map
