@@ -4,6 +4,13 @@
 
 ---
 
+## 2026-03-22 | Sprint 4B progress: Anti-duplicate + Verify + Bluesky
+- Anti-duplicate guard: atomic lock (status='sending'), rejects already-sent posts (409)
+- /verify endpoint: external read-back for TG (trusted), Dev.to (API), VK (API), Threads RU (API), Hashnode (trusted), Bluesky (trusted)
+- Bluesky adapter confirmed working (previous 400 was one-time text truncation issue)
+- Observer: Publication Log section live, sent/verified/sending stats added to SQL
+- Publisher Service redeployed with post_external_id in SELECT
+
 ## 2026-03-22 | Sprint 4A: Publisher Refactor
 - Python Publisher Service deployed (Docker :8086, FastAPI)
 - Reads platform_post by ID from DB, calls auto-publisher adapters
