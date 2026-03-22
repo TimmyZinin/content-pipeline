@@ -1,6 +1,6 @@
 # Publisher — Публикатор
 
-## Текущее состояние (v3) — Sprint 4A
+## Текущее состояние (v3) — Sprint 4A + 4B checkpoint
 
 ### Publisher v3 (n8n)
 **n8n ID:** ErbbScuvxWHLX1np

@@ -131,9 +131,11 @@ flowchart LR
 ```
 
 **Python Publisher Service:** Docker :8086 (internal :8085), reads post by ID from DB, calls auto-publisher adapter
-**Модель:** `scheduled → sent` (API ok) / `scheduled → failed` (retry 3x → TG alert)
-**Verified:** Telegram, Dev.to, VK, Threads RU, Hashnode (5/5)
-**Bluesky:** known bug (адаптер), fix в 4B
+**Модель:** `scheduled → sending (lock) → sent (API ok) → verified (/verify)` / `→ failed (retry 3x → TG alert)`
+**Anti-duplicate:** atomic lock через `sending` status, отказ при повторном вызове
+**Sent:** Telegram, Dev.to, VK, Threads RU, Hashnode (5/5)
+**Bluesky:** 1 успешный тест, нужна дополнительная проверка
+**/verify:** endpoint для external read-back (6 платформ)
 **Подробнее:** [[Publisher]]
 
 ---
@@ -170,9 +172,9 @@ flowchart LR
 
 | Секция | Что показывает |
 |--------|---------------|
-| Cards | Draft / Scheduled / Published / Skipped / Failed / Posts / News |
+| Cards | Draft / Scheduled / Published* / Sent / Verified / Skipped / Failed / Posts / News / Unused |
 | Pipeline Health | Последний запуск каждого workflow за 24ч, количество записей |
-| Platform Summary | Таблица: платформа × статус (draft/scheduled/published/skipped/failed) |
+| Platform Summary | Таблица: платформа × статус (draft/scheduled/sending/sent/verified/published*/skipped/failed) |
 | Schedule | Расписание постов с временем (Istanbul), quality score, topic cluster |
 | Recent Published | Последние 10 опубликованных постов |
 | Publication Log | Последние 20 попыток публикации: sent/verified/failed с external ID и ошибками (Sprint 4A) |
