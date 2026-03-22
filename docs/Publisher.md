@@ -1,37 +1,61 @@
 # Publisher — Публикатор
 
-> Текущий статус и план рефакторинга
-
-## Текущее состояние (v2)
+## Текущее состояние (v2) — до Sprint 4
 
 **n8n ID:** 1cD3qXs2XZkgcQyt
-**Cron:** */30 06:00-21:00 MSK
+**Cron:** */30 09:00-03:00 Istanbul (UTC+3)
 **SQL:** `WHERE status = 'scheduled' AND scheduled_at <= NOW() LIMIT 1`
 
-### Верифицированные платформы
+### Текущая модель статусов
 
-| Платформа | Статус | Проблема |
-|-----------|--------|----------|
-| Telegram | ✅ Работает | — |
-| Dev.to | ✅ Работает | — |
-| LinkedIn | ⚠️ Не верифицирован | ugcPosts API, нет проверки |
-| Facebook | ⚠️ Не верифицирован | Publer state:"now" |
-| Threads EN | ⚠️ Не верифицирован | Publer state:"now" |
-| Threads RU | ⚠️ Двухшаговый | create проходит, publish не вызывается |
-| VK | ⚠️ Формат | wall.post query params не создаёт пост |
-| Bluesky | ⚠️ JSON bug | Апострофы в тексте ломают createRecord |
-| Hashnode | ⚠️ Не проверен | GraphQL mutation |
+```
+scheduled → published (UPDATE без внешней проверки)
+scheduled → failed (только при явной ошибке)
+```
+
+> **Проблема:** `published` в БД означает "UPDATE выполнен", а НЕ "пост реально на платформе". Observer и Dashboard показывают `published` как факт, хотя это не верифицировано.
+
+### Верифицированные платформы (честный статус)
+
+| Платформа | Publisher | Реально работает? |
+|-----------|----------|------------------|
+| Telegram | ✅ Отправляет | Да, проверено |
+| Dev.to | ✅ Отправляет | Да, проверено |
+| LinkedIn | ⚠️ Отправляет | Не верифицировано (ugcPosts API) |
+| Facebook | ⚠️ Отправляет | Не верифицировано (Publer) |
+| Threads EN | ⚠️ Отправляет | Не верифицировано (Publer) |
+| Threads RU | ❌ Не работает | Двухшаговый API: create OK, publish не вызывается |
+| VK | ❌ Не работает | wall.post формат запроса |
+| Bluesky | ❌ Не работает | JSON bug (апострофы) |
+| Hashnode | ❌ Не проверен | GraphQL mutation |
 | Mastodon | ❌ Блокер | Токен невалиден |
 
-### Известные проблемы
+### Известные проблемы текущего v2
 
-1. **Токены захардкожены** в Code ноде — нужно в n8n Credentials
+1. **Токены захардкожены** в Code ноде
 2. **UPDATE безусловный** — ставит `published` даже если API не ответил
-3. **LIMIT 1** — 1 пост за 30 мин, нет loop
+3. **LIMIT 1** — 1 пост за 30 мин
 4. **Нет retry** — при ошибке пост теряется
-5. **Двухшаговые API** (Threads RU, Bluesky) работают криво через If → 3 ноды одновременно
+5. **Двухшаговые API** работают криво
 
-## План рефакторинга (Спринт 4)
+---
+
+## Sprint 4: Publisher Refactor (целевая архитектура)
+
+### Новая модель статусов
+
+```
+scheduled → sent → verified (пост подтверждён на платформе)
+scheduled → sent → failed (API error после retry)
+scheduled → failed (невозможно отправить)
+```
+
+| Статус | Что означает |
+|--------|-------------|
+| scheduled | Curator назначил, ожидает Publisher |
+| sent | Python сервис отправил, API ответил OK |
+| verified | Пост подтверждён внешней проверкой (API read-back) |
+| failed | Ошибка после 3 retry → dead letter + TG alert |
 
 ### Целевая архитектура
 
@@ -42,43 +66,46 @@ flowchart LR
     ADAPT --> API["Platform APIs"]
     API -->|"response"| PY
     PY -->|"result JSON"| N8N
-    N8N -->|"IF success"| UPDATE["UPDATE status=published"]
-    N8N -->|"IF error"| RETRY["Retry / Dead Letter"]
+    N8N -->|"API OK"| SENT["status = sent"]
+    SENT -->|"verify check"| VERIFIED["status = verified"]
+    N8N -->|"API error"| RETRY["Retry (3x backoff)"]
+    RETRY -->|"3 failures"| DEAD["status = failed\n+ TG alert"]
 ```
 
 ### Почему Python сервис
 
 - auto-publisher уже содержит 15 рабочих адаптеров (Python)
-- n8n Code sandbox блокирует fetch/require — невозможно делать HTTP из Code нод
-- Двухшаговые API (Threads create+publish, Bluesky auth+post) уже реализованы в Python
+- n8n Code sandbox блокирует fetch/require
+- Двухшаговые API уже реализованы в Python
 - Версионирование в git, а не в n8n UI
 
-### Задачи Спринта 4
+### Задачи Sprint 4
 
 | # | Задача | Описание |
 |---|--------|----------|
-| PUB-1 | Python HTTP сервис | Flask/FastAPI wrapper над auto-publisher адаптерами |
-| PUB-2 | n8n Publisher refactor | Одна HTTP Request нода → Python сервис |
-| PUB-3 | Проверка API ответа | status=published ТОЛЬКО после success |
+| PUB-1 | Python Publisher Service | FastAPI wrapper над auto-publisher/adapters/. Docker :8085 |
+| PUB-2 | n8n Publisher → HTTP | Одна HTTP Request нода → Python сервис |
+| PUB-3 | Новая модель статусов | scheduled → sent → verified/failed в БД |
 | PUB-4 | Retry с backoff | 3 попытки: 5/15/60 мин |
-| PUB-5 | Dead letter | После 3 неудач → status=failed + TG alert |
-| PUB-6 | Все 10 платформ | Через Python адаптеры |
-| PUB-7 | Credentials в n8n | Вынести токены из Code нод |
+| PUB-5 | Dead letter + TG alert | После 3 неудач → failed + уведомление |
+| PUB-6 | Все 14 платформ | Через Python адаптеры |
+| PUB-7 | Credentials в .env | Токены в /opt/content-pipeline/.env |
+| PUB-8 | Observer: Publication Log | Секция с sent/verified/failed |
 
 ### Существующие адаптеры (auto-publisher)
 
-| Файл | Платформа | Статус |
-|------|-----------|--------|
-| adapters/telegram.py | Telegram | ✅ |
-| adapters/threads.py | Threads | ✅ |
-| adapters/vk.py | VK | ✅ |
-| adapters/bluesky.py | Bluesky | ✅ |
-| adapters/mastodon.py | Mastodon | ✅ |
-| adapters/devto.py | Dev.to | ✅ |
-| adapters/hashnode.py | Hashnode | ✅ |
-| adapters/facebook.py | Facebook | ✅ |
-| adapters/tumblr.py | Tumblr | ✅ |
-| adapters/writeas.py | Write.as | ✅ |
-| adapters/minds.py | Minds | ✅ |
-| adapters/nostr.py | Nostr | ✅ |
-| adapters/tiktok.py | TikTok | ✅ |
+| Файл | Платформа |
+|------|-----------|
+| adapters/telegram.py | Telegram |
+| adapters/threads.py | Threads |
+| adapters/vk.py | VK |
+| adapters/bluesky.py | Bluesky |
+| adapters/mastodon.py | Mastodon |
+| adapters/devto.py | Dev.to |
+| adapters/hashnode.py | Hashnode |
+| adapters/facebook.py | Facebook |
+| adapters/tumblr.py | Tumblr |
+| adapters/writeas.py | Write.as |
+| adapters/minds.py | Minds |
+| adapters/nostr.py | Nostr |
+| adapters/tiktok.py | TikTok |

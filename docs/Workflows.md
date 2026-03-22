@@ -110,7 +110,7 @@ flowchart LR
 
 **Tier-система:** см. [[Curator]]
 **Дедупликация:** topic_cluster за последние 3 дня — fresh посты приоритетнее stale
-**Scheduling:** Dubai timezone UTC+4, stagger по платформам
+**Scheduling:** Istanbul UTC+3, stagger по платформам
 **Результат:** ~14-25 записей `scheduled`, остальные `skipped`
 
 ---
@@ -119,7 +119,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    CRON["Cron */30\n06-21 MSK"] --> SQL["WHERE status=scheduled\nAND scheduled_at <= NOW()\nLIMIT 1"]
+    CRON["Cron */30\n09-03 Istanbul"] --> SQL["WHERE status=scheduled\nAND scheduled_at <= NOW()\nLIMIT 1"]
     SQL --> CODE["Подготовка API\nurl + body + headers"]
     CODE --> HTTP["HTTP Request"]
     HTTP --> IF{"2-й шаг?"}
@@ -129,9 +129,9 @@ flowchart LR
     THREADS & BSKY --> UPDATE
 ```
 
-**Текущий статус:** 2-3 платформы из 10 верифицированы
-**Проблема:** токены в Code ноде, нет проверки API ответа, нет retry
-**План:** рефакторинг через Python HTTP сервис (auto-publisher адаптеры)
+**Текущий статус:** 2 платформы верифицированы (TG, Dev.to), 8 не верифицированы или сломаны
+**Текущая модель:** `scheduled → published` (UPDATE без внешней проверки)
+**Sprint 4:** рефакторинг через Python HTTP сервис + новая модель `scheduled → sent → verified/failed`
 
 ---
 

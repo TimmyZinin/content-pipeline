@@ -35,7 +35,7 @@ flowchart TD
     CHECK -->|Нет| SKIP1["status = skipped\nreason: not_publish_day"]
     CHECK -->|Да| DEDUP["Дедупликация:\nfresh > stale"]
     DEDUP --> SELECT["Выбрать TOP N\n(maxPerDay)"]
-    SELECT --> SCHEDULE["scheduled_at =\nDubai time → UTC"]
+    SELECT --> SCHEDULE["scheduled_at =\nIstanbul → UTC"]
     SCHEDULE --> UPDATE["status = scheduled"]
     SELECT --> OVER["Остальные:\nstatus = skipped"]
 ```

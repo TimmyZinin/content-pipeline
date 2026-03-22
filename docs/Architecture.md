@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart TB
-    subgraph SOURCES["Источники | cron 02:00 MSK"]
+    subgraph SOURCES["Источники | cron 05:00 Istanbul"]
         GN["Google News RSS<br/>EN + RU, 9 запросов"]
         HN["HackerNews<br/>Top AI stories"]
         GH["GitHub Trending<br/>AI repos за 7 дней"]
@@ -14,26 +14,26 @@ flowchart TB
         FILTER["Фильтр 24ч + дедупликация SHA256"]
     end
 
-    subgraph WRITER["Writer — Автор | 03:00 MSK"]
+    subgraph WRITER["Writer — Автор | 06:00 Istanbul"]
         LLM["MiniMax M2.5<br/>700-1200 символов RU"]
         QG["Quality Gate<br/>12 проверок, score >= 65"]
     end
 
-    subgraph ILLUSTRATOR["Illustrator — Художник | 03:30 MSK"]
+    subgraph ILLUSTRATOR["Illustrator — Художник | 06:30 Istanbul"]
         GEMINI["Gemini 2.5 Flash<br/>Pop-art стиль"]
     end
 
-    subgraph ADAPTER["Adapter — Адаптер | 04:00 MSK"]
+    subgraph ADAPTER["Adapter — Адаптер | 07:00 Istanbul"]
         ADAPT["MiniMax M2.5<br/>10 платформ"]
     end
 
-    subgraph CURATOR["Curator — Куратор | 04:30 MSK"]
+    subgraph CURATOR["Curator — Куратор | 07:30 Istanbul"]
         TIER["Tier-система<br/>Quality-based selection"]
         DEDUP["Дедупликация<br/>topic_cluster 3 дня"]
         SCHED["Stagger scheduling<br/>Istanbul UTC+3"]
     end
 
-    subgraph PUBLISHER["Publisher — Публикатор | */30 06-21 MSK"]
+    subgraph PUBLISHER["Publisher — Публикатор | */30 09-03 Istanbul"]
         DIRECT["Direct API<br/>TG, Bluesky, Mastodon<br/>Dev.to, Hashnode"]
         PUBLER["Publer API<br/>Facebook, TikTok<br/>Threads EN"]
         TWOAPI["Two-step API<br/>Threads RU, LinkedIn"]

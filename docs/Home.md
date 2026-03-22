@@ -38,11 +38,11 @@ flowchart LR
 | # | Компонент | Статус | n8n ID | Cron/Trigger |
 |---|-----------|--------|--------|-------------|
 | 1 | Scout | ✅ Active | RSQALdJch4WYZfit | каждые 6ч |
-| 2 | Writer | ✅ Active | ZQtg31g6dzAV0lXX | 03:00 MSK |
-| 3 | Illustrator | ✅ Active | Z94O5uyaFEmrYGIJ | 03:30 MSK |
-| 4 | Adapter | ✅ Active | NJoPcdp38ZU0dQwG | 04:00 MSK |
-| 5 | Curator | ✅ Active | EYPcT5B4rLmQRQBM | 04:30 MSK |
-| 6 | Publisher v2 | ⚠️ Partial (2/10) | 1cD3qXs2XZkgcQyt | */30 06-21 MSK |
+| 2 | Writer | ✅ Active | ZQtg31g6dzAV0lXX | 06:00 Istanbul |
+| 3 | Illustrator | ✅ Active | Z94O5uyaFEmrYGIJ | 06:30 Istanbul |
+| 4 | Adapter | ✅ Active | NJoPcdp38ZU0dQwG | 07:00 Istanbul |
+| 5 | Curator | ✅ Active | EYPcT5B4rLmQRQBM | 07:30 Istanbul |
+| 6 | Publisher v2 | ⚠️ Partial (2/10) | 1cD3qXs2XZkgcQyt | */30 09-03 Istanbul |
 | 7 | Dashboard | ✅ Active | DC3a34HOedbU7rVb | webhook |
 | 8 | Curator Preview | ✅ Active | JzYcKrUfXheatEi1 | webhook |
 | 9 | Observer | ✅ Active | V2wnna7ACw5iSqdi | webhook |
