@@ -347,7 +347,32 @@ def publish_one(post: dict) -> PublishResult:
 
 # Staged rollout: only these platforms are allowed to publish
 # Add platforms here as they pass verification
-PUBLISH_ALLOWLIST = os.getenv("PUBLISH_ALLOWLIST", "telegram,writeas,minds").split(",")
+PUBLISH_ALLOWLIST = [p.strip() for p in os.getenv("PUBLISH_ALLOWLIST", "telegram,writeas,minds").split(",") if p.strip()]
+
+
+def _update_post_status(post_id: int, status: str, external_id: str | None = None,
+                        error: str | None = None, retries: int | None = None) -> None:
+    """Update platform_post status in DB. Publisher Service = owner of status transitions."""
+    conn = get_db()
+    try:
+        cur = conn.cursor()
+        if status == "sent":
+            cur.execute(
+                "UPDATE content.platform_posts SET status = 'sent', post_external_id = %s, published_at = NOW(), error = NULL WHERE id = %s;",
+                (external_id or "", post_id)
+            )
+        elif status == "failed":
+            safe_error = (error or "unknown")[:500].replace("'", "''")
+            cur.execute(
+                "UPDATE content.platform_posts SET status = 'failed', error = %s, retries = COALESCE(retries, 0) + 1 WHERE id = %s;",
+                (safe_error, post_id)
+            )
+        conn.commit()
+    except Exception as e:
+        log.error(f"DB update failed for post {post_id}: {e}")
+        conn.rollback()
+    finally:
+        conn.close()
 
 
 @app.post("/publish", response_model=PublishResult)
@@ -378,6 +403,13 @@ def publish_endpoint(req: PublishRequest):
     log.info(f"Publishing: id={post['id']} platform={post['platform']}")
     result = publish_one(post)
     log.info(f"Result: {result.status} {result.platform} ext={result.external_id} err={result.error}")
+
+    # Publisher Service = owner of final status transition
+    if result.status == "ok":
+        _update_post_status(req.platform_post_id, "sent", external_id=result.external_id)
+    else:
+        _update_post_status(req.platform_post_id, "failed", error=result.error)
+
     return result
 
 

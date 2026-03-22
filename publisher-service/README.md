@@ -12,10 +12,24 @@ Reads platform_post by ID from DB, publishes via adapter, returns result.
 | POST | /test-publish | **DISABLED** (HTTP 403) | — |
 | GET | /health | Health check | No |
 
+## Status Ownership
+
+Publisher Service is the **owner of status transitions**:
+- `scheduled/failed` → `sending` (atomic lock before publish)
+- `sending` → `sent` + `post_external_id` (on success)
+- `sending` → `failed` + `error` + `retries++` (on failure)
+
+n8n Publisher v3 role = **orchestration only**:
+- Select scheduled posts (with allowlist SQL)
+- Call Publisher Service
+- Handle retry logic (re-schedule failed posts)
+- Dead letter alerts (TG notification after 3 fails)
+- n8n does NOT write `sent/failed` — Publisher Service does
+
 ## Guards
 
 - **Anti-duplicate:** atomic `sending` lock before publish
-- **Allowlist:** `PUBLISH_ALLOWLIST` env var (secondary to SQL upstream in n8n)
+- **Allowlist:** `PUBLISH_ALLOWLIST` env var (secondary to SQL upstream in n8n), whitespace-trimmed
 - **Feature flags:** `THREADS_REPLY_ENABLED` (default false)
 
 ## Deployment
