@@ -171,17 +171,15 @@ flowchart TB
                         <li>Cron 04:00 MSK</li>
                     </ul>
                 </div>
-                <div class="wf-card wip">
-                    <h3><span class="badge badge-orange">NEXT</span> Curator - Куратор</h3>
+                <div class="wf-card done">
+                    <h3><span class="badge badge-green">DONE</span> Curator - Куратор</h3>
                     <ul>
-                        <li>Распределяет посты по платформам с учётом частоты</li>
-                        <li>Threads RU/EN: все 5 постов/день</li>
-                        <li>Telegram: 2 лучших/день (09:00, 14:00 Dubai)</li>
-                        <li>LinkedIn: 1 лучший/день (10:00 Dubai)</li>
-                        <li>VK / Facebook: 1-2 поста (3x/нед)</li>
-                        <li>Bluesky / Mastodon: 2-3 поста/день</li>
-                        <li>Dev.to / Hashnode: 1 статья/нед (лучший пост)</li>
-                        <li>Устанавливает scheduled_at для каждой адаптации</li>
+                        <li>ID: EYPcT5B4rLmQRQBM, cron 04:30 MSK</li>
+                        <li>Tier 1: TG 2/день, Threads RU/EN 5/день, Bluesky 3/день</li>
+                        <li>Tier 2: LinkedIn 1 (ПН/СР/ПТ), VK/FB 1 (ПН/СР/ПТ), Mastodon 1/день</li>
+                        <li>Tier 3: Dev.to/Hashnode 1 (только ПН)</li>
+                        <li>Quality-based: лучшие по score → приоритетным платформам</li>
+                        <li>scheduled_at в Dubai timezone (UTC+4)</li>
                     </ul>
                 </div>
                 <div class="wf-card wip">

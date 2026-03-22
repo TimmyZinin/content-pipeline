@@ -9,6 +9,7 @@
 | Illustrator | Z94O5uyaFEmrYGIJ | 03:30 MSK | ACTIVE |
 | Adapter | NJoPcdp38ZU0dQwG | 04:00 MSK | ACTIVE |
 | Dashboard | DC3a34HOedbU7rVb | webhook | ACTIVE |
+| Curator | EYPcT5B4rLmQRQBM | 04:30 MSK | ACTIVE |
 | Publisher v2 | 1cD3qXs2XZkgcQyt | */30 06-21 | ACTIVE |
 
 ## Publisher — верифицированный статус платформ
