@@ -30,7 +30,7 @@ flowchart TB
     subgraph CURATOR["Curator — Куратор | 04:30 MSK"]
         TIER["Tier-система<br/>Quality-based selection"]
         DEDUP["Дедупликация<br/>topic_cluster 3 дня"]
-        SCHED["Stagger scheduling<br/>Dubai timezone UTC+4"]
+        SCHED["Stagger scheduling<br/>Istanbul UTC+3"]
     end
 
     subgraph PUBLISHER["Publisher — Публикатор | */30 06-21 MSK"]
@@ -45,7 +45,7 @@ flowchart TB
     DB_POSTS --> GEMINI --> DB_POSTS
     DB_POSTS --> ADAPT --> DB_PP[("content.platform_posts<br/>status: draft")]
     DB_PP --> TIER & DEDUP --> SCHED --> DB_PP2[("content.platform_posts<br/>status: scheduled")]
-    DB_PP2 --> DIRECT & PUBLER & TWOAPI --> DB_PP3[("content.platform_posts<br/>status: published")]
+    DB_PP2 --> DIRECT & PUBLER & TWOAPI --> DB_PP3[("content.platform_posts<br/>status: published*")]
 
     style SOURCES fill:#dbeafe,stroke:#2563eb
     style SCOUT fill:#dbeafe,stroke:#2563eb
@@ -88,13 +88,25 @@ graph LR
     style EXTERNAL fill:#fef2f2,stroke:#dc2626
 ```
 
-## Время работы (MSK, ежедневно)
+## Время работы (Istanbul UTC+3, ежедневно)
 
-| Время | Workflow | Что делает |
-|-------|----------|------------|
-| 02:00 | Scout | Сбор новостей из RSS, HN, GitHub |
-| 03:00 | Writer | Генерация 5 постов из лучших новостей |
-| 03:30 | Illustrator | Генерация картинок Gemini |
-| 04:00 | Adapter | Адаптация 5 постов на 10 платформ |
-| 04:30 | Curator | Распределение по расписанию |
-| 06:00-21:00 | Publisher | Публикация каждые 30 мин по scheduled_at |
+> Все cron-ы задаются в UTC на сервере. Ниже — Istanbul (UTC+3) для удобства.
+
+| Время (Istanbul) | Workflow | Что делает |
+|-----------------|----------|------------|
+| 05:00 | Scout | Сбор новостей из RSS, HN, GitHub |
+| 06:00 | Writer | Генерация 5 постов из лучших новостей |
+| 06:30 | Illustrator | Генерация картинок Gemini |
+| 07:00 | Adapter | Адаптация 5 постов на 14 платформ |
+| 07:30 | Curator | Распределение по расписанию |
+| 09:00-00:00 | Publisher | Публикация каждые 30 мин по scheduled_at |
+
+## Текущая модель статусов
+
+> Модель `scheduled → published` действует до Sprint 4.
+> В Sprint 4 вводится `scheduled → sent → verified/failed`.
+
+```
+draft → scheduled → published (текущая, без внешней верификации)
+draft → skipped (пропущен Curator)
+```

@@ -6,7 +6,7 @@
 
 Curator берёт ~50 записей `draft` из `content.platform_posts` и решает:
 - **Какие** посты публиковать (quality-based selection)
-- **Когда** (stagger scheduling, Dubai UTC+4)
+- **Когда** (stagger scheduling, Istanbul UTC+3)
 - **Где** (Tier-система + день недели)
 
 ## Конфигурация платформ

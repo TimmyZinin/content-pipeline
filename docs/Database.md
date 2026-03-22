@@ -77,12 +77,15 @@ erDiagram
 | adapted | Адаптирован Adapter |
 
 ### content.platform_posts
+
+**Текущая модель (до Sprint 4):**
+
 | Статус | Описание |
 |--------|----------|
 | draft | Создан Adapter, ожидает Curator |
 | scheduled | Назначен Curator, ожидает Publisher |
 | skipped | Пропущен Curator (не день публикации, лимит, дедупликация) |
-| published | Опубликован Publisher |
+| published | UPDATE выполнен Publisher. **НЕ означает внешнюю верификацию** |
 | failed | Ошибка публикации |
 
 ```mermaid
@@ -90,10 +93,33 @@ stateDiagram-v2
     [*] --> draft: Adapter создал
     draft --> scheduled: Curator назначил
     draft --> skipped: Curator пропустил
-    scheduled --> published: Publisher опубликовал
+    scheduled --> published: Publisher UPDATE (без внешней проверки!)
     scheduled --> failed: API ошибка
     failed --> scheduled: Retry
     published --> [*]
+```
+
+**Целевая модель (Sprint 4):**
+
+| Статус | Описание |
+|--------|----------|
+| draft | Создан Adapter |
+| scheduled | Назначен Curator |
+| skipped | Пропущен Curator |
+| sent | API запрос отправлен, ответ получен |
+| verified | Пост подтверждён на платформе (внешняя проверка) |
+| failed | Ошибка после 3 retry |
+
+```mermaid
+stateDiagram-v2
+    [*] --> draft: Adapter
+    draft --> scheduled: Curator
+    draft --> skipped: Curator
+    scheduled --> sent: Publisher отправил, API ответил OK
+    sent --> verified: Внешняя проверка (API read-back)
+    sent --> failed: API error / timeout
+    failed --> scheduled: Retry (max 3)
+    verified --> [*]
 ```
 
 ## Credentials

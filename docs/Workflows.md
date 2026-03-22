@@ -6,12 +6,12 @@
 
 | # | Workflow | n8n ID | Cron | Статус |
 |---|---------|--------|------|--------|
-| 1 | Scout — Разведка | RSQALdJch4WYZfit | каждые 6ч (02:00 MSK) | ✅ Active |
-| 2 | Writer — Автор | ZQtg31g6dzAV0lXX | 03:00 MSK | ✅ Active |
-| 3 | Illustrator — Художник | Z94O5uyaFEmrYGIJ | 03:30 MSK | ✅ Active |
-| 4 | Adapter — Адаптер | NJoPcdp38ZU0dQwG | 04:00 MSK | ✅ Active |
-| 5 | Curator — Куратор | EYPcT5B4rLmQRQBM | 04:30 MSK | ✅ Active |
-| 6 | Publisher v2 — Публикатор | 1cD3qXs2XZkgcQyt | */30 06-21 MSK | ⚠️ Partial |
+| 1 | Scout — Разведка | RSQALdJch4WYZfit | каждые 6ч (05:00 Istanbul) | ✅ Active |
+| 2 | Writer — Автор | ZQtg31g6dzAV0lXX | 06:00 Istanbul | ✅ Active |
+| 3 | Illustrator — Художник | Z94O5uyaFEmrYGIJ | 06:30 Istanbul | ✅ Active |
+| 4 | Adapter — Адаптер | NJoPcdp38ZU0dQwG | 07:00 Istanbul | ✅ Active |
+| 5 | Curator — Куратор | EYPcT5B4rLmQRQBM | 07:30 Istanbul | ✅ Active |
+| 6 | Publisher v2 — Публикатор | 1cD3qXs2XZkgcQyt | */30 09:00-00:00 Istanbul | ⚠️ Partial |
 | 7 | Dashboard — Дашборд | DC3a34HOedbU7rVb | webhook | ✅ Active |
 | 8 | Curator Preview | JzYcKrUfXheatEi1 | webhook | ✅ Active |
 | 9 | Observer — Наблюдатель | V2wnna7ACw5iSqdi | webhook | ✅ Active |
@@ -176,4 +176,4 @@ flowchart LR
 **Ссылки на Observer:**
 - corp.timzinin.com → sidebar → Observer (PIPELINE)
 - corp.timzinin.com/content-calendar.html → подзаголовок
-- TG сводка от Curator (ежедневно 04:30 MSK)
+- TG сводка от Curator (ежедневно 07:30 Istanbul)
