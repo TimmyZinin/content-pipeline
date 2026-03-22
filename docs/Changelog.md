@@ -4,6 +4,25 @@
 
 ---
 
+## 2026-03-22 | Reconciliation Pass
+- docs/Home.md: добавлен Observer, policies (SoT, timezone, DoD), связанные репо
+- docs/Workflows.md: добавлен Observer workflow (#9) с описанием секций
+- docs/Platforms.md: добавлены 4 новые платформы (writeas/tumblr/minds/nostr), обновлены статусы
+- docs/Changelog.md: добавлены записи Sprint 3
+- SESSION_HANDOFF.md: помечен как legacy
+- Timezone policy: storage=UTC, display=Istanbul (UTC+3)
+- docs/ = source of truth, wiki = mirror
+
+## 2026-03-22 | Спринт 3 Curator+: Полнота + Observability
+- CUR-11: +4 платформы в Adapter + Curator (writeas, tumblr, minds, nostr)
+- CUR-12: TG сводка после Curator с ссылкой на Observer (ежедневно 04:30 MSK)
+- CUR-13: Observer: секция Pipeline Health (статус каждого workflow за 24ч)
+- CUR-14: Конфиг в JSON (/opt/content-pipeline/curator-config.json, 14 платформ)
+- CUR-15: Fallback alert при 0 draft постов → TG уведомление
+- CUR-16: Observer ссылки на corp.timzinin.com (sidebar + content-calendar)
+- CUR-17: Override кнопки — отложено в конец бэклога
+- Observer workflow (V2wnna7ACw5iSqdi): Pipeline Health, Platform Summary, Schedule, Recent Published
+
 ## 2026-03-22 | Спринт 2 Curator: Smart Scheduling
 - Дедупликация по topic_cluster (3-дневное окно)
 - Fresh посты приоритетнее stale

@@ -1,4 +1,9 @@
-# Content Pipeline v2 — Статус на 22 марта 2026
+# LEGACY — НЕ ИСПОЛЬЗОВАТЬ
+
+> **Source of truth: docs/Home.md**
+> Этот файл устарел. Актуальная документация в docs/.
+
+# Content Pipeline v2 — Статус на 22 марта 2026 (LEGACY)
 
 ## Работающие workflows (n8n, Contabo)
 

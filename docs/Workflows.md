@@ -14,6 +14,7 @@
 | 6 | Publisher v2 — Публикатор | 1cD3qXs2XZkgcQyt | */30 06-21 MSK | ⚠️ Partial |
 | 7 | Dashboard — Дашборд | DC3a34HOedbU7rVb | webhook | ✅ Active |
 | 8 | Curator Preview | JzYcKrUfXheatEi1 | webhook | ✅ Active |
+| 9 | Observer — Наблюдатель | V2wnna7ACw5iSqdi | webhook | ✅ Active |
 
 ## Деактивированные
 
@@ -143,5 +144,36 @@ flowchart LR
 ## 8. Curator Preview
 
 **URL:** GET https://n8n.timzinin.com/webhook/curator-preview
-**Назначение:** dry-run Curator без изменения БД
+**Назначение:** dry-run Curator без изменения БД. Показывает snapshot текущих draft → что бы Curator назначил, НЕ меняя данные.
+**Важно:** preview пустой если нет draft постов (все уже scheduled/skipped). Это не баг.
 **Формат:** JSON с полями scheduled[], skipped[], summary
+
+---
+
+## 9. Observer — Наблюдатель
+
+**n8n ID:** V2wnna7ACw5iSqdi
+**URL:** GET https://n8n.timzinin.com/webhook/observer
+**Timezone:** Istanbul (UTC+3)
+
+```mermaid
+flowchart LR
+    WH["Webhook GET"] --> SQL["PostgreSQL:\nstats + schedule +\nplatforms + health"]
+    SQL --> HTML["Render HTML"]
+    HTML --> RESP["HTML Response"]
+```
+
+Центральный operational dashboard. Показывает:
+
+| Секция | Что показывает |
+|--------|---------------|
+| Cards | Draft / Scheduled / Published / Skipped / Failed / Posts / News |
+| Pipeline Health | Последний запуск каждого workflow за 24ч, количество записей |
+| Platform Summary | Таблица: платформа × статус (draft/scheduled/published/skipped/failed) |
+| Schedule | Расписание постов с временем (Istanbul), quality score, topic cluster |
+| Recent Published | Последние 10 опубликованных постов |
+
+**Ссылки на Observer:**
+- corp.timzinin.com → sidebar → Observer (PIPELINE)
+- corp.timzinin.com/content-calendar.html → подзаголовок
+- TG сводка от Curator (ежедневно 04:30 MSK)
