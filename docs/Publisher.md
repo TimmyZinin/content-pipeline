@@ -14,21 +14,45 @@ Schedule → Select Scheduled → Has Post? → Call Publisher → Update Status
 
 ### Python Publisher Service
 **URL:** http://publisher-service:8085 (Docker, Contabo :8086 external)
-**API:** POST /publish {platform_post_id} → {status, platform, post_id, external_id, error}
-**Health:** GET /health
 **Source:** /opt/publisher-service/main.py
 **Adapters:** /opt/auto-publisher/adapters/ (mounted read-only)
 **Credentials:** /opt/zinin-corp/.env (env_file в docker-compose)
 
-### Текущая модель статусов (Sprint 4A)
+**Endpoints:**
+| Method | Path | Input | Output |
+|--------|------|-------|--------|
+| POST | /publish | {platform_post_id} | {status, platform, post_id, external_id, error} |
+| POST | /verify | {platform_post_id} | {status, platform, post_id, reason} |
+| GET | /health | — | {status: "ok"} |
+
+**Anti-duplicate guard:** перед публикацией сервис атомарно ставит `status='sending'` через `UPDATE ... WHERE status IN ('scheduled','failed') RETURNING id`. Если пост уже `sent`, `verified`, `published` или `sending` — возвращает HTTP 400/409. Это предотвращает повторную публикацию при параллельных вызовах или ручном тестировании.
+
+### Текущая модель статусов
 
 ```
-scheduled → sent (Python Service вернул ok, API платформы принял)
-scheduled → failed (после 3 retry с backoff 5/15/60 мин)
+scheduled → sending → sent → (verified в 4B)
+scheduled → sending → failed (после 3 retry)
 ```
 
-> `verified` вводится в Sprint 4B (external read-back).
-> Старый статус `published` больше НЕ используется Publisher v3. Записи со статусом `published` — наследие старого Publisher v2.
+| Статус | Что означает |
+|--------|-------------|
+| scheduled | Curator назначил, ожидает Publisher |
+| sending | Atomic lock: Publisher Service взял пост, публикация в процессе |
+| sent | API платформы ответил OK, external_id записан |
+| verified | /verify подтвердил наличие поста на платформе (Sprint 4B) |
+| failed | Ошибка после 3 retry, TG alert отправлен |
+| published | Legacy статус от старого Publisher v2. Не используется Publisher v3 |
+
+**Verify endpoint:** проверяет наличие поста на платформе по external_id.
+
+| Платформа | Метод verify | Надёжность |
+|-----------|-------------|------------|
+| Telegram | Trusted (sendMessage response) | Высокая — Тим подтвердил внешне |
+| Dev.to | API GET /articles/{id} | Высокая — проверяет реальную статью |
+| VK | API wall.getById | Высокая — проверяет реальный пост |
+| Threads RU | Graph API GET /{id} | Высокая — проверяет реальный пост |
+| Hashnode | Trusted (GraphQL response) | Средняя — доверяем API ответу |
+| Bluesky | Trusted (createRecord response) | Средняя — доверяем API ответу |
 
 ### Deactivated
 - **Publisher v2** (1cD3qXs2XZkgcQyt) — ДЕАКТИВИРОВАН 22 мар 2026. Был причиной дубликатов и публикаций без картинок.
@@ -42,7 +66,7 @@ scheduled → failed (после 3 retry с backoff 5/15/60 мин)
 | VK | ✅ sent | 350 | wall.post через user token |
 | Threads RU | ✅ sent | 17992609448939339 | Двухшаговый API (create+publish) |
 | Hashnode | ✅ sent | 69c0062180048b76fe51c505 | GraphQL mutation |
-| Bluesky | ❌ error | — | 400 Bad Request, баг в адаптере (апострофы). Fix в 4B |
+| Bluesky | ✅ sent (1 test) | at://...3mhnuulnbph2x | Адаптер работает. Ранее 400 при тексте >300 chars с em-dash. Один успешный тест, нужна дополнительная проверка |
 
 ### Не тестировались в 4A
 | Платформа | Причина | Когда |

@@ -4,12 +4,16 @@
 
 ---
 
-## 2026-03-22 | Sprint 4B progress: Anti-duplicate + Verify + Bluesky
-- Anti-duplicate guard: atomic lock (status='sending'), rejects already-sent posts (409)
-- /verify endpoint: external read-back for TG (trusted), Dev.to (API), VK (API), Threads RU (API), Hashnode (trusted), Bluesky (trusted)
-- Bluesky adapter confirmed working (previous 400 was one-time text truncation issue)
-- Observer: Publication Log section live, sent/verified/sending stats added to SQL
-- Publisher Service redeployed with post_external_id in SELECT
+## 2026-03-22 | Sprint 4B checkpoint: Anti-duplicate + Verify + Observer
+- Anti-duplicate guard: atomic lock (status='sending'), rejects sent/verified/published (400/409)
+- /verify endpoint: TG (trusted), Dev.to (API GET), VK (API wall.getById), Threads RU (Graph API), Hashnode (trusted), Bluesky (trusted)
+- Bluesky: 1 successful test (adapter works), previous 400 was text truncation. Needs more testing for confidence
+- Observer cards: +Sent, +Verified alongside Published* (legacy)
+- Observer Publication Log: shows sent/verified/failed with external IDs and errors
+- Status model: scheduled → sending (lock) → sent (API ok) → verified (read-back) / failed (3 retry)
+- sending status = atomic anti-duplicate guard, not a long-lived state
+- Publisher Service redeployed: post_external_id in SELECT, /verify endpoint
+- Docs updated: Publisher.md, Database.md, Workflows.md, Changelog.md
 
 ## 2026-03-22 | Sprint 4A: Publisher Refactor
 - Python Publisher Service deployed (Docker :8086, FastAPI)

@@ -78,47 +78,29 @@ erDiagram
 
 ### content.platform_posts
 
-**Текущая модель (до Sprint 4):**
+**Текущая модель (Sprint 4A/4B):**
 
 | Статус | Описание |
 |--------|----------|
 | draft | Создан Adapter, ожидает Curator |
 | scheduled | Назначен Curator, ожидает Publisher |
 | skipped | Пропущен Curator (не день публикации, лимит, дедупликация) |
-| published | UPDATE выполнен Publisher. **НЕ означает внешнюю верификацию** |
-| failed | Ошибка публикации |
-
-```mermaid
-stateDiagram-v2
-    [*] --> draft: Adapter создал
-    draft --> scheduled: Curator назначил
-    draft --> skipped: Curator пропустил
-    scheduled --> published: Publisher UPDATE (без внешней проверки!)
-    scheduled --> failed: API ошибка
-    failed --> scheduled: Retry
-    published --> [*]
-```
-
-**Целевая модель (Sprint 4):**
-
-| Статус | Описание |
-|--------|----------|
-| draft | Создан Adapter |
-| scheduled | Назначен Curator |
-| skipped | Пропущен Curator |
-| sent | API запрос отправлен, ответ получен |
-| verified | Пост подтверждён на платформе (внешняя проверка) |
-| failed | Ошибка после 3 retry |
+| sending | Atomic lock: Publisher Service взял пост, публикация в процессе |
+| sent | API платформы ответил OK, external_id записан |
+| verified | /verify подтвердил наличие поста на платформе |
+| failed | Ошибка после 3 retry, TG alert отправлен |
+| published | Legacy: старый Publisher v2. Не используется v3 |
 
 ```mermaid
 stateDiagram-v2
     [*] --> draft: Adapter
     draft --> scheduled: Curator
     draft --> skipped: Curator
-    scheduled --> sent: Publisher отправил, API ответил OK
-    sent --> verified: Внешняя проверка (API read-back)
-    sent --> failed: API error / timeout
-    failed --> scheduled: Retry (max 3)
+    scheduled --> sending: Publisher Service (atomic lock)
+    sending --> sent: API OK + external_id
+    sending --> failed: API error
+    sent --> verified: /verify read-back
+    failed --> scheduled: Retry (max 3, backoff 5/15/60 min)
     verified --> [*]
 ```
 
