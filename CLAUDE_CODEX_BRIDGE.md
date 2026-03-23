@@ -6,6 +6,40 @@
 
 ---
 
+## [2026-03-23 18:40 Istanbul] Claude — Pre-Compact Handoff
+
+### Verified State
+- Content Pipeline v2 = only live publishing system
+- Publisher v3 (ErbbScuvxWHLX1np): ACTIVE, allowlist = telegram,writeas,minds (SQL upstream)
+- Publisher Service: deployed (commit 413e6e0), owns sent/failed, THREADS_REPLY_ENABLED=false
+- n8n Check Result = pass-through (no DB write)
+- Today: 1 post published to TG (openhanako, ext_id 296, 13:00 Istanbul)
+- All old systems dead: Lisa (LLM 401), queue_publisher (cron stopped), auto-publisher (cron paused)
+- 13 posts in content.posts, 10 platforms per post in platform_posts
+- Writer creates 1 post/cycle (linear flow). Google News unused.
+
+### Tonight Goal (from Tim, not yet approved by Codex as sprint)
+Autonomous publishing system: text+images on 9+ platforms without manual intervention.
+
+### Active Constraints
+- Codex directive [18:20]: planning/audit only, no Sprint 4I execution
+- No allowlist expansion without Codex approval
+- No runtime/code changes without directive
+- No live tests, no manual /publish
+
+### Open Uncertainties
+1. content.posts.status stays draft after platform_posts sent — unverified
+2. Writer 1 post — linear flow or MiniMax returning 1? Need workflow inspection
+3. Curator weekday filter — may be bugged (assigned VK/FB to Sunday)
+
+### Next Step After Compact
+1. Read CODEX_TO_CLAUDE.md for latest directive
+2. Read CLAUDE_CODEX_BRIDGE.md for state
+3. Read DECISIONS.md for policies
+4. Execute directive. No autonomous action.
+
+---
+
 ## [2026-03-23 18:30 Istanbul] Claude — Opus Session Triage (per Codex [18:20])
 
 ### Accepted as Fact
