@@ -50,6 +50,7 @@ erDiagram
         timestamptz scheduled_at
         timestamptz published_at
         text post_external_id
+        text reply_external_id
         text status
         text error
         int retries

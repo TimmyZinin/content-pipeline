@@ -38,11 +38,12 @@ ADAPTER_MAP = {
     "devto": "devto",
     "hashnode": "hashnode",
     "mastodon": "mastodon",
-    "facebook": "_publer",  # Personal profile via Publer
+    "facebook": "_publer",  # Personal profile via Publer (Graph API = Page only, wrong target)
     "tumblr": "tumblr",
     "writeas": "writeas",
     "minds": "minds",
     "nostr": "nostr",
+    "linkedin": "linkedin",
 }
 
 # Publer API config
@@ -104,6 +105,45 @@ def _publer_upload_media(image_url: str) -> str | None:
     except Exception as e:
         log.error(f"Publer media upload failed: {e}")
         return None
+
+
+FB_PAGE_ACCESS_TOKEN = os.getenv("FB_PAGE_ACCESS_TOKEN", "") or os.getenv("FACEBOOK_PAGE_ACCESS_TOKEN", "")
+FB_PAGE_ID = os.getenv("FB_PAGE_ID", "") or os.getenv("FACEBOOK_PAGE_ID", "")
+
+
+def _facebook_post_comment(post_external_id: str, comment_text: str) -> dict:
+    """Post a comment on a Facebook page post via Graph API.
+    post_external_id can be a Publer post_link URL or a Facebook post ID."""
+    if not FB_PAGE_ACCESS_TOKEN:
+        return {"ok": False, "error": "FB_PAGE_ACCESS_TOKEN not set"}
+
+    # Extract Facebook post ID from Publer response (could be URL or ID)
+    fb_post_id = post_external_id
+    # If it's a Publer internal ID, we need the actual FB post ID
+    # Publer returns post_link like "https://facebook.com/.../posts/..." or just an ID
+    if "/" in fb_post_id:
+        # Try to extract from URL
+        parts = fb_post_id.rstrip("/").split("/")
+        fb_post_id = parts[-1] if parts else fb_post_id
+    # If still not a proper FB post ID, prefix with page ID
+    if FB_PAGE_ID and "_" not in fb_post_id and not fb_post_id.startswith(FB_PAGE_ID):
+        fb_post_id = f"{FB_PAGE_ID}_{fb_post_id}"
+
+    try:
+        url = f"https://graph.facebook.com/v21.0/{fb_post_id}/comments"
+        data = urllib.parse.urlencode({
+            "message": comment_text[:8000],
+            "access_token": FB_PAGE_ACCESS_TOKEN,
+        }).encode()
+        req = urllib.request.Request(url, data=data, method="POST")
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            result = json.loads(resp.read())
+        comment_id = result.get("id", "")
+        log.info(f"Facebook comment posted: {comment_id}")
+        return {"ok": True, "comment_id": comment_id}
+    except Exception as e:
+        log.error(f"Facebook comment failed: {e}")
+        return {"ok": False, "error": str(e)}
 
 
 def _publish_via_publer(platform: str, text: str, image_url: str | None = None) -> dict:
@@ -221,18 +261,68 @@ def publish_one(post: dict) -> PublishResult:
         return PublishResult(status="error", platform=platform, post_id=post["id"],
                              error=f"No adapter for: {platform}")
 
-    # Publer path
+    # Facebook Graph API path (post + first comment)
+    if adapter_name == "_facebook_graph":
+        text = post["adapted_text"] or ""
+        image_url = post.get("image_url") if post.get("include_image") else None
+        try:
+            # Step 1: Publish post to Facebook page
+            if image_url:
+                # Photo post
+                fb_url = f"https://graph.facebook.com/v21.0/{FB_PAGE_ID}/photos"
+                params = {"caption": text, "url": image_url, "access_token": FB_PAGE_ACCESS_TOKEN}
+            else:
+                # Text post
+                fb_url = f"https://graph.facebook.com/v21.0/{FB_PAGE_ID}/feed"
+                params = {"message": text, "access_token": FB_PAGE_ACCESS_TOKEN}
+            data = urllib.parse.urlencode(params).encode()
+            req = urllib.request.Request(fb_url, data=data, method="POST")
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                fb_result = json.loads(resp.read())
+            fb_post_id = fb_result.get("post_id") or fb_result.get("id", "")
+            if not fb_post_id:
+                return PublishResult(status="error", platform=platform, post_id=post["id"],
+                                    error=f"No post_id in FB response: {fb_result}")
+            log.info(f"Facebook published: {fb_post_id}")
+
+            # Step 2: First comment with CTA/link
+            comment_text = post.get("comment_text") or ""
+            link_url = post.get("link_url") or ""
+            if link_url and link_url not in comment_text:
+                comment_text = (comment_text + "\n\n" + link_url).strip() if comment_text else link_url
+            if comment_text:
+                comment_result = _facebook_post_comment(fb_post_id, comment_text)
+                if comment_result.get("ok"):
+                    log.info(f"Facebook first comment: {comment_result.get('comment_id')}")
+                    _persist_reply_id(post["id"], comment_result.get("comment_id", ""))
+                else:
+                    log.warning(f"Facebook comment failed: {comment_result.get('error')}")
+
+            return PublishResult(status="ok", platform=platform, post_id=post["id"],
+                                external_id=fb_post_id)
+        except Exception as e:
+            log.error(f"Facebook Graph API failed: {e}")
+            return PublishResult(status="error", platform=platform, post_id=post["id"],
+                                error=f"Graph API: {str(e)[:200]}")
+
+    # Publer path (facebook personal profile, threads_en)
     if adapter_name == "_publer":
         text = post["adapted_text"] or ""
         image_url = post.get("image_url") if post.get("include_image") else None
+        # Facebook link-in-body: Publer can't do comments on personal profiles
+        link_url = post.get("link_url") or ""
+        if link_url and platform == "facebook" and link_url not in text:
+            text = text.rstrip() + "\n\n" + link_url
+            log.info(f"Facebook: link appended to body ({link_url[:60]})")
         result = _publish_via_publer(platform, text, image_url)
         if isinstance(result, dict):
             ok = result.get("ok", False)
+            ext_id = str(result.get("post_id", "")) if ok else None
+
             return PublishResult(
                 status="ok" if ok else "error",
                 platform=platform, post_id=post["id"],
-                external_id=str(result.get("post_id", "")) if ok else None,
-                error=result.get("error") if not ok else None
+                external_id=ext_id, error=result.get("error") if not ok else None
             )
         return PublishResult(status="ok", platform=platform, post_id=post["id"])
 
@@ -323,6 +413,10 @@ def publish_one(post: dict) -> PublishResult:
         ext_id = str(result.get("post_id", result.get("id", ""))) if ok else None
         error = None if ok else result.get("error", result.get("reason", str(result)[:200]))
 
+        # Persist LinkedIn comment_id if returned by adapter
+        if ok and platform == "linkedin" and result.get("comment_id"):
+            _persist_reply_id(post["id"], result["comment_id"])
+
         # Phase 2A: Threads RU reply after main post (feature flag)
         if ok and platform == "threads_ru" and THREADS_REPLY_ENABLED and ext_id:
             reply_text = kwargs.get("reply_text") or post.get("reply_text") or ""
@@ -330,7 +424,9 @@ def publish_one(post: dict) -> PublishResult:
                 log.info(f"Threads reply: posting reply to {ext_id}")
                 reply_result = _threads_create_reply(ext_id, reply_text)
                 if reply_result.get("ok"):
-                    log.info(f"Threads reply ok: {reply_result.get('reply_id')}")
+                    reply_id = reply_result.get("reply_id", "")
+                    log.info(f"Threads reply ok: {reply_id}")
+                    _persist_reply_id(post["id"], reply_id)
                 else:
                     log.warning(f"Threads reply failed: {reply_result.get('error')}")
                     # Reply failure doesn't fail the main post
@@ -350,6 +446,26 @@ def publish_one(post: dict) -> PublishResult:
 PUBLISH_ALLOWLIST = [p.strip() for p in os.getenv("PUBLISH_ALLOWLIST", "telegram,writeas,minds").split(",") if p.strip()]
 
 
+def _persist_reply_id(post_id: int, reply_id: str) -> bool:
+    """Persist reply external ID to platform_posts.reply_external_id."""
+    conn = get_db()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE content.platform_posts SET reply_external_id = %s WHERE id = %s;",
+            (reply_id, post_id)
+        )
+        conn.commit()
+        log.info(f"Reply ID persisted: post={post_id} reply={reply_id}")
+        return True
+    except Exception as e:
+        log.error(f"Failed to persist reply ID for post {post_id}: {e}")
+        conn.rollback()
+        return False
+    finally:
+        conn.close()
+
+
 def _update_post_status(post_id: int, status: str, external_id: str | None = None,
                         error: str | None = None) -> bool:
     """Update platform_post status in DB. Publisher Service = owner of status transitions.
@@ -363,10 +479,26 @@ def _update_post_status(post_id: int, status: str, external_id: str | None = Non
                 (external_id or "", post_id)
             )
         elif status == "failed":
-            cur.execute(
-                "UPDATE content.platform_posts SET status = 'failed', error = %s, retries = COALESCE(retries, 0) + 1 WHERE id = %s;",
-                ((error or "unknown")[:500], post_id)
-            )
+            # Auto-retry with backoff: 5min, 15min, 60min. After 3 retries → permanent failed.
+            cur.execute("SELECT COALESCE(retries, 0) FROM content.platform_posts WHERE id = %s;", (post_id,))
+            row = cur.fetchone()
+            current_retries = (row[0] if row else 0) + 1
+            BACKOFF_MINUTES = [5, 15, 60]
+            MAX_RETRIES = 3
+            if current_retries < MAX_RETRIES:
+                backoff = BACKOFF_MINUTES[min(current_retries - 1, len(BACKOFF_MINUTES) - 1)]
+                cur.execute(
+                    f"UPDATE content.platform_posts SET status = 'scheduled', error = %s, retries = %s, "
+                    f"scheduled_at = NOW() + INTERVAL '{backoff} minutes' WHERE id = %s;",
+                    ((error or "unknown")[:500], current_retries, post_id)
+                )
+                log.info(f"Auto-retry: post {post_id} rescheduled in {backoff}min (retry {current_retries}/{MAX_RETRIES})")
+            else:
+                cur.execute(
+                    "UPDATE content.platform_posts SET status = 'failed', error = %s, retries = %s WHERE id = %s;",
+                    ((error or "unknown")[:500], current_retries, post_id)
+                )
+                log.warning(f"Max retries reached: post {post_id} → failed (retries={current_retries})")
         conn.commit()
         return True
     except Exception as e:
