@@ -5,7 +5,9 @@ import importlib
 import json
 import logging
 import os
+import re
 import sys
+import time
 import traceback
 import urllib.request
 
@@ -254,12 +256,56 @@ def get_post(post_id: int) -> dict | None:
         conn.close()
 
 
+
+_RE_PROFANITY = re.compile(
+    r"\b(нахер|нахуй|блядь|блять|пизд\w*|еб(?:ан|уч|ать|ал|ёт|ут|ли|ну)\w*|мудак|мудил|дерьм\w*|говн\w*)"
+    r"|\b(хуйн|хуёв|хуев|хуйло|хуй\b)", re.I
+)
+_RE_AI_TELL = re.compile(
+    r"\b\d{1,3}%\s+(AI|компаний|юзеров|разрабов|проектов|агентов|людей|систем|пользовател)", re.I
+)
+
+
+def _quality_gate(text: str) -> tuple[bool, str]:
+    """Pre-flight content quality check. Returns (pass, reason)."""
+    text = text or ""
+    if not text:
+        return True, ""
+    if _RE_PROFANITY.search(text):
+        return False, "profanity detected"
+    if _RE_AI_TELL.search(text):
+        return False, "AI-tell percentage detected"
+    if "<think>" in text or "<reasoning>" in text:
+        return False, "LLM reasoning leak"
+    return True, ""
+
+
 def publish_one(post: dict) -> PublishResult:
     platform = post["platform"]
     adapter_name = ADAPTER_MAP.get(platform)
     if not adapter_name:
         return PublishResult(status="error", platform=platform, post_id=post["id"],
                              error=f"No adapter for: {platform}")
+
+    # Cache-bust image URLs to prevent platform-side caching of old redirects
+    # Only for corp.timzinin.com host (skip signed/external URLs to preserve signatures)
+    if post.get("image_url") and post.get("include_image"):
+        from urllib.parse import urlparse
+        parsed = urlparse(post["image_url"])
+        if parsed.hostname == "corp.timzinin.com":
+            sep = "&" if "?" in post["image_url"] else "?"
+            post["image_url"] = f"{post['image_url']}{sep}v={time.time_ns()}"
+
+    # Quality gate - reject profanity, AI-tell percentages, LLM leaks
+    for field in ("adapted_text", "comment_text", "reply_text"):
+        text_to_check = post.get(field) or ""
+        if not text_to_check:
+            continue
+        qg_pass, qg_reason = _quality_gate(text_to_check)
+        if not qg_pass:
+            log.warning("Quality gate REJECTED post %s (%s) field=%s: %s", post["id"], platform, field, qg_reason)
+            return PublishResult(status="skipped", platform=platform, post_id=post["id"],
+                                 error=f"quality_gate ({field}): {qg_reason}")
 
     # Facebook Graph API path (post + first comment)
     if adapter_name == "_facebook_graph":
@@ -499,6 +545,12 @@ def _update_post_status(post_id: int, status: str, external_id: str | None = Non
                     ((error or "unknown")[:500], current_retries, post_id)
                 )
                 log.warning(f"Max retries reached: post {post_id} → failed (retries={current_retries})")
+        elif status == "skipped":
+            cur.execute(
+                "UPDATE content.platform_posts SET status = 'skipped', error = %s WHERE id = %s;",
+                ((error or "quality_gate")[:500], post_id)
+            )
+            log.info(f"Quality gate skipped: post {post_id}")
         conn.commit()
         return True
     except Exception as e:
@@ -541,6 +593,8 @@ def publish_endpoint(req: PublishRequest):
     # Publisher Service = owner of final status transition
     if result.status == "ok":
         db_ok = _update_post_status(req.platform_post_id, "sent", external_id=result.external_id)
+    elif result.status == "skipped":
+        db_ok = _update_post_status(req.platform_post_id, "skipped", error=result.error)
     else:
         db_ok = _update_post_status(req.platform_post_id, "failed", error=result.error)
 
