@@ -17,7 +17,26 @@ from pydantic import BaseModel
 
 sys.path.insert(0, "/opt/auto-publisher")
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+class StructuredFormatter(logging.Formatter):
+    """JSON structured log formatter with correlation keys."""
+    def format(self, record):
+        entry = {
+            "ts": self.formatTime(record),
+            "level": record.levelname,
+            "service": "publisher-service",
+            "msg": record.getMessage(),
+        }
+        for key in ("post_id", "platform_post_id", "platform", "reason_code", "external_id"):
+            val = getattr(record, key, None)
+            if val is not None:
+                entry[key] = val
+        if record.exc_info and record.exc_info[0]:
+            entry["error"] = str(record.exc_info[1])
+        return json.dumps(entry, ensure_ascii=False)
+
+_handler = logging.StreamHandler()
+_handler.setFormatter(StructuredFormatter())
+logging.basicConfig(level=logging.INFO, handlers=[_handler])
 log = logging.getLogger("publisher-service")
 
 app = FastAPI(title="Publisher Service", version="1.0")
@@ -256,6 +275,24 @@ def get_post(post_id: int) -> dict | None:
         conn.close()
 
 
+def _log_pipeline(stage: str, reason_code: str, post_id: int | None = None,
+                  platform_post_id: int | None = None, platform: str | None = None,
+                  detail: dict | None = None):
+    """Write structured log to content.pipeline_log table."""
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO content.pipeline_log (stage, reason_code, post_id, platform_post_id, platform, detail) "
+            "VALUES (%s, %s, %s, %s, %s, %s)",
+            (stage, reason_code, post_id, platform_post_id, platform,
+             json.dumps(detail, ensure_ascii=False) if detail else None)
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        log.warning(f"Pipeline log write failed: {e}")
+
 
 _RE_PROFANITY = re.compile(
     r"\b(нахер|нахуй|блядь|блять|пизд\w*|еб(?:ан|уч|ать|ал|ёт|ут|ли|ну)\w*|мудак|мудил|дерьм\w*|говн\w*)"
@@ -303,7 +340,14 @@ def publish_one(post: dict) -> PublishResult:
             continue
         qg_pass, qg_reason = _quality_gate(text_to_check)
         if not qg_pass:
-            log.warning("Quality gate REJECTED post %s (%s) field=%s: %s", post["id"], platform, field, qg_reason)
+            qg_code = {"profanity detected": "QG_PROFANITY", "AI-tell percentage detected": "QG_AI_TELL", "LLM reasoning leak": "QG_LLM_LEAK"}.get(qg_reason, "QG_UNKNOWN")
+            log.warning("Quality gate rejected", extra={
+                "platform_post_id": post["id"], "post_id": post.get("post_id"),
+                "platform": platform, "reason_code": qg_code, "field": field,
+            })
+            _log_pipeline("quality_gate", qg_code, post_id=post.get("post_id"),
+                          platform_post_id=post["id"], platform=platform,
+                          detail={"field": field, "reason": qg_reason})
             return PublishResult(status="skipped", platform=platform, post_id=post["id"],
                                  error=f"quality_gate ({field}): {qg_reason}")
 
@@ -586,9 +630,17 @@ def publish_endpoint(req: PublishRequest):
     finally:
         conn.close()
 
-    log.info(f"Publishing: id={post['id']} platform={post['platform']}")
+    log.info("Publishing", extra={"platform_post_id": post["id"], "post_id": post.get("post_id"), "platform": post["platform"], "reason_code": "PUB_START"})
+    _log_pipeline("publisher", "PUB_START", post_id=post.get("post_id"), platform_post_id=post["id"], platform=post["platform"])
     result = publish_one(post)
-    log.info(f"Result: {result.status} {result.platform} ext={result.external_id} err={result.error}")
+    reason_map = {"ok": "PUB_OK", "skipped": "PUB_SKIPPED", "error": "PUB_HTTP_ERR"}
+    reason = reason_map.get(result.status, "PUB_FAILED")
+    log.info("Publish result", extra={
+        "platform_post_id": result.post_id, "platform": result.platform,
+        "external_id": result.external_id, "reason_code": reason,
+    })
+    _log_pipeline("publisher", reason, post_id=post.get("post_id"), platform_post_id=post["id"],
+                  platform=result.platform, detail={"external_id": result.external_id, "error": result.error})
 
     # Publisher Service = owner of final status transition
     if result.status == "ok":
@@ -599,8 +651,9 @@ def publish_endpoint(req: PublishRequest):
         db_ok = _update_post_status(req.platform_post_id, "failed", error=result.error)
 
     if not db_ok:
-        # DB update failed — post stuck in 'sending'. Report error to caller.
-        log.error(f"CRITICAL: DB status update failed for post {req.platform_post_id}. Post stuck in 'sending'.")
+        log.error("DB update failed — post stuck in sending", extra={
+            "platform_post_id": req.platform_post_id, "reason_code": "PUB_DB_FAIL",
+        })
         return PublishResult(
             status="error", platform=result.platform, post_id=result.post_id,
             external_id=result.external_id,
