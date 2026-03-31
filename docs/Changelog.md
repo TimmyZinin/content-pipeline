@@ -2,7 +2,27 @@
 
 > Лог изменений Content Pipeline v2. Новые записи — сверху.
 
+```mermaid
+gantt
+    title Pipeline Milestones 2026
+    dateFormat YYYY-MM-DD
+    section Sprints
+    Sprint 4A-4C (Publisher v3)    :done, 2026-03-20, 2026-03-22
+    Sprint 4D-4I (Multi-platform)  :done, 2026-03-22, 2026-03-24
+    Quality Gate + nginx fix       :done, 2026-03-30, 2026-03-31
+    Pipeline stabilization         :active, 2026-03-31, 2026-04-02
+```
+
 ---
+
+## 2026-03-31 | Pipeline stabilization
+
+- Publisher v3 **деактивирован** (предотвращение незапланированных публикаций)
+- 18 draft rows заморожены
+- Runbook создан: [[Runbook]]
+- Документация полностью синхронизирована (docs/ = wiki/)
+- Секреты удалены из Changelog (Publer API key prefix)
+- Текущий статус платформ обновлён с реальными данными
 
 ## 2026-03-30 | Quality Gate + Cache-Buster + nginx fix
 
@@ -149,7 +169,7 @@ Honest platform status after media fix:
 - Dashboard обновлён: секция "Расписание публикаций"
 
 ## 2026-03-21 | Publer API + стратегии
-- Publer API key получен (de555d3f...)
+- Publer API key получен (хранится в .env)
 - 3 аккаунта: Facebook, Threads EN, TikTok
 - Обновлены 16 стратегий в smm-research-hub
 

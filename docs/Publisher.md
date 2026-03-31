@@ -46,10 +46,12 @@ flowchart LR
 **Причина:** nginx 302 redirect кешировался на стороне Telegram/Threads. Cache-buster обходит кеш.
 
 ### Python Publisher Service
-**URL:** http://publisher-service:8085 (Docker, Contabo :8086 external)
+**URL:** http://publisher-service:8085 (Docker internal)
+**External port:** 127.0.0.1:8086 (localhost only, **NOT exposed to internet**)
 **Source:** /opt/publisher-service/main.py
 **Adapters:** /opt/auto-publisher/adapters/ (mounted read-only)
 **Credentials:** /opt/zinin-corp/.env (env_file в docker-compose)
+**Auth:** Нет HTTP-аутентификации. Доступ ограничен на уровне сети (127.0.0.1 binding + Docker bridge).
 
 **Endpoints:**
 | Method | Path | Input | Output | DB changes? |
@@ -122,7 +124,30 @@ scheduled → skipped (Quality Gate reject)
 
 ### Текущий статус публикации (Phase 3)
 
-**Сейчас активно публикуются:** 13 платформ (telegram, bluesky, threads_ru, threads_en, vk, facebook, mastodon, devto, hashnode, linkedin, writeas, minds, nostr)
+> **⚠️ ТЕКУЩЕЕ СОСТОЯНИЕ (31 марта 2026):**
+> - Publisher v3 **ДЕАКТИВИРОВАН** (ожидание решения Тима)
+> - 18 draft rows заморожены
+> - Row 393 (telegram, post 41) — не публикуется (HTTP 400, причина не определена)
+> - Никакие посты не уходят автоматически
+
+**Allowlist (когда Publisher активен):** 13 платформ — telegram, bluesky, threads_ru, threads_en, vk, facebook, mastodon, devto, hashnode, linkedin, writeas, minds, nostr
+
+**Статус платформ:**
+| Платформа | Статус | Примечание |
+|-----------|--------|-----------|
+| telegram | ✅ Работает | Quality Gate active |
+| threads_ru | ✅ Работает | 2-step API |
+| threads_en | ✅ Работает | Через Publer |
+| bluesky | ✅ Работает | Image auto-resize >950KB |
+| vk | ✅ Работает | wall.post |
+| facebook | ✅ Работает | Через Publer |
+| linkedin | ✅ Работает | Direct adapter |
+| devto | ✅ Работает | Long-form |
+| hashnode | ✅ Работает | GraphQL |
+| writeas | ✅ Работает | |
+| minds | ✅ Работает | |
+| nostr | ✅ Работает | |
+| mastodon | ✅ Работает | Image support |
 
 Все платформы проходят через Quality Gate перед публикацией.
 
