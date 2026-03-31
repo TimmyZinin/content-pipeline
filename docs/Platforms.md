@@ -31,27 +31,24 @@ graph TD
 
 ## Полная таблица
 
-| # | Платформа | Язык | Частота | Время (Istanbul UTC+3) | Метод | Publisher v3 статус |
-|---|-----------|------|---------|---------------|-------|----------------|
-| 1 | Telegram @timofeyzinin | RU | 2/день | 09:00, 14:00 | Direct adapter | ✅ Verified (Tim external) |
-| 2 | Threads RU @timzinin | RU | 5/день | 10-18:00 | Direct adapter (2-step) | ✅ Verified (API) |
-| 3 | Threads EN | EN | 5/день | 10-18:00 | Publer 2-step media | ✅ Verified (Tim external) |
-| 4 | LinkedIn | RU | 1/день ПН/СР/ПТ | 10:00 | Direct adapter (linkedin.py) | ✅ В Publisher v3 |
-| 5 | Bluesky | EN | 3/день | 11:00, 15:00, 19:00 | Direct adapter | ✅ Работает (auto-resize >950KB) |
-| 6 | Mastodon | EN | 1/день | 19:00 | Direct adapter | ✅ Работает (токен обновлён Sprint 4D) |
-| 7 | VK | RU | 1/день ПН/СР/ПТ | 16:00 | Direct adapter (community wall) | ✅ Verified (API + Tim external) |
-| 8 | Facebook | RU | 1/день ПН/СР/ПТ | 16:00 | Publer 2-step media (personal) | ✅ Verified (Tim external) |
-| 9 | Dev.to | EN | 1/нед (ПН) | 19:15 | Direct adapter | ✅ Verified (API) |
-| 10 | Hashnode | EN | 1/нед (ПН) | 19:30 | Direct adapter (GraphQL) | ✅ Verified (API) |
+| # | Платформа | Язык | Частота | Метод | Current status (31 мар 2026) | Last publish |
+|---|-----------|------|---------|-------|------------------------------|-------------|
+| 1 | Telegram @timofeyzinin | RU | 2/день | Direct adapter | ✅ Currently verified | Mar 31 (msg_id=318) |
+| 2 | Threads RU @timzinin | RU | 5/день | Direct adapter (2-step) | ✅ Currently verified | Mar 30 |
+| 3 | Threads EN | EN | 5/день | Publer 2-step media | ⚠️ Recently verified | Mar 28 |
+| 4 | LinkedIn | RU | 1/день ПН/СР/ПТ | Direct adapter | ⚠️ Recently verified | Mar 27 |
+| 5 | Bluesky | EN | 3/день | Direct adapter (auto-resize) | ✅ Currently verified | Mar 30 |
+| 6 | Mastodon | EN | 1/день | Direct adapter | ⚠️ Recently verified | Mar 29 |
+| 7 | VK | RU | 1/день | Direct adapter (community) | ⚠️ Recently verified | Mar 28 |
+| 8 | Facebook | RU | 1/день | Publer (personal profile) | ⚠️ Recently verified | Mar 28 |
+| 9 | Dev.to | EN | 1/нед (ПН) | Direct adapter | ⏳ Historically worked | Mar 23 |
+| 10 | Hashnode | EN | 1/нед (ПН) | Direct adapter (GraphQL) | ⏳ Historically worked | Mar 23 |
+| 11 | Write.as | EN | 1/нед (ПН) | Direct adapter | ⏳ Historically worked | Manual test 22 Mar |
+| 12 | Minds | EN | ПН/СР/ПТ | Direct adapter | ⏳ Historically worked | Manual test 22 Mar |
+| 13 | Nostr | EN | ПН/СР/ПТ | Direct adapter | ⏳ Historically worked | Manual test 22 Mar |
+| 14 | Tumblr | EN | ПН/СР/ПТ | — | ❌ Blocked (401 OAuth) | Never |
 
-## Подключены в Sprint 4C
-
-| # | Платформа | Язык | Частота | Время (Istanbul) | Publisher v3 статус |
-|---|-----------|------|---------|-----------------|---------------------|
-| 11 | Write.as | EN | 1/нед (ПН) | 23:00 | ✅ Working (text verified) |
-| 12 | Tumblr | EN | ПН/СР/ПТ | 23:15 | ❌ Blocked (401 Unauthorized — OAuth tokens expired) |
-| 13 | Minds | EN | ПН/СР/ПТ | 23:15 | ✅ Working (text verified) |
-| 14 | Nostr | EN | ПН/СР/ПТ | 23:30 | ✅ Working (text verified) |
+Legend: ✅ = published in last 2 days | ⚠️ = published in last 7 days | ⏳ = published >7 days ago | ❌ = blocked
 
 ## Не подключены (бэклог)
 
