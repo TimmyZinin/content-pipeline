@@ -117,7 +117,31 @@ WHERE include_image = true AND image_url IS NULL AND status NOT IN ('skipped');
 - 18 rows заморожены в draft
 
 ### Row 393 (telegram, post 41)
-- Статус: draft (заморожен)
-- Ошибка: HTTP 400 через /publish endpoint, но работает через прямой API вызов
-- Причина: не определена
-- Рекомендация: пересоздать пост с чистым текстом (убрать "97%")
+- Статус: **skipped** (закрыт)
+- Ошибка: HTTP 400 через /publish endpoint + AI-tell "97%"
+- Решение: помечен как skipped, не будет повторяться
+
+## Go-live чеклист
+
+> Перед активацией Publisher v3 — проверить все пункты.
+
+```mermaid
+flowchart TD
+    C1["1. Publisher v3 active?"] --> C2["2. Quality Gate deployed?"]
+    C2 --> C3["3. 0 stuck sending?"]
+    C3 --> C4["4. 0 unauthorized scheduled?"]
+    C4 --> C5["5. Freeze control tested?"]
+    C5 --> C6["6. Runbook read?"]
+    C6 --> GO["✅ GO LIVE"]
+```
+
+| # | Критерий | Команда проверки | Ожидаемый результат |
+|---|----------|-----------------|-------------------|
+| 1 | Publisher v3 active | `SELECT active FROM workflow_entity WHERE id='ErbbScuvxWHLX1np'` | `true` |
+| 2 | Quality Gate deployed | `docker exec publisher-service grep _quality_gate /app/main.py` | found |
+| 3 | 0 stuck sending | `SELECT count(*) FROM content.platform_posts WHERE status='sending'` | 0 |
+| 4 | Scheduled rows = expected | `SELECT count(*) FROM content.platform_posts WHERE status='scheduled'` | known count |
+| 5 | Freeze works | Set 1 row to draft → verify Curator does NOT revert (Publisher v3 off) | stays draft |
+| 6 | Image serving OK | `curl -sI https://corp.timzinin.com/content-images/post_45_*.png` | HTTP 200 |
+| 7 | No profanity in queue | Run QG audit on all draft/scheduled rows | 0 dirty |
+| 8 | Tim approved content | Показать тексты Тиму через TG | OK received |
