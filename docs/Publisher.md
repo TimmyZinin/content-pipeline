@@ -124,11 +124,12 @@ scheduled → skipped (Quality Gate reject)
 
 ### Текущий статус публикации (Phase 3)
 
-> **⚠️ ТЕКУЩЕЕ СОСТОЯНИЕ (31 марта 2026):**
-> - Publisher v3 **ДЕАКТИВИРОВАН** (ожидание решения Тима)
-> - 18 draft rows заморожены
-> - Row 393 (telegram, post 41) — не публикуется (HTTP 400, причина не определена)
-> - Никакие посты не уходят автоматически
+> **ТЕКУЩЕЕ СОСТОЯНИЕ (31 марта 2026):**
+> - Publisher v3 **АКТИВЕН** (quality gate включён)
+> - 15 draft rows ожидают scheduling
+> - Row 393 (telegram, post 41) — skipped (AI-tell + HTTP 400)
+> - Публикация идёт только для rows со статусом `scheduled`
+> - E2E verified: post 471 → TG msg_id=318 (quality gate PASS)
 
 **Allowlist (когда Publisher активен):** 13 платформ — telegram, bluesky, threads_ru, threads_en, vk, facebook, mastodon, devto, hashnode, linkedin, writeas, minds, nostr
 
