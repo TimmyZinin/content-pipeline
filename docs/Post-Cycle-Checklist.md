@@ -43,7 +43,7 @@ ORDER BY platform, status;
 
 | Signal | Meaning |
 |--------|---------|
-| Allowlisted posts = `sent` | ✅ Rollout working |
+| Allowlisted posts = `sent` | ✅ Phase 1 working |
 | Non-allowlisted = `scheduled` | ✅ Correctly filtered |
 | Any `failed` for allowlisted | ⚠️ Investigate |
 | Any `sending` stuck | ❌ Anti-duplicate issue |

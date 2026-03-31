@@ -15,11 +15,7 @@
 | 4A | Publisher Refactor (Python Service + n8n v3) | ✅ Done | 22 мар |
 | 4B | Publisher: Publer + verify + anti-duplicate | ✅ Done (7/10 verified) | 22 мар |
 | 4C | Text Coverage Completion | ✅ Done (10 working, 2 blocked, 1 partial) | 22 мар |
-| 4D | Rollout Hardening & Link Runtime Alignment | 🔄 In progress | 22-23 мар |
-| 4E | Threads RU Reply Orchestration | ⏳ Next | — |
-| 4F | Facebook First Comment | ⏳ After 4E | — |
-| 4G | LinkedIn System Audit & Integration Design | 🔄 In progress (research) | 23 мар |
-| 4H | Observer UI Hardening & Design Alignment | ⏳ Backlogged | — |
+| 4G | LinkedIn System Audit & Integration Design | ⏳ After 4C | — |
 | 5 | ChatPlace + Email + TG-бот | ❌ Не начат | — |
 | 6 | Analyst + Feedback | ❌ Не начат | — |
 
@@ -83,34 +79,7 @@ Bottleneck всей системы — Publisher работает на 2/10 пл
 | 4C-5 | Minds | ✅ Working |
 | 4C-6 | Nostr | ✅ Working |
 
-## Sprint 4D: Rollout Hardening & Link Runtime Alignment (IN PROGRESS)
-
-Hardening body-link propagation + staged rollout allowlist.
-
-| # | Задача | Статус | Описание |
-|---|--------|--------|----------|
-| 4D-1 | Body-link hardening | ✅ Done | Char limits (Bluesky/Nostr), CTA blocks (Dev.to/Hashnode), HTML anchor (TG) |
-| 4D-2 | Staged allowlist | ✅ Done | SQL upstream filter + env var secondary guard |
-| 4D-3 | CTA placement matrix | ✅ Done | docs/CTA-Placement.md |
-| 4D-4 | Incident containment | ✅ Done | /test-publish disabled, cleanup done |
-| 4D-5 | First rollout cycle verification | ⏳ Waiting | Awaiting first Curator+Publisher cycle with allowlist |
-| 4D-6 | Allowlist expansion | ⏳ After 4D-5 | Add more platforms after verified cycle |
-
-## Sprint 4E: Threads RU Reply Orchestration (NEXT)
-
-**Цель:** после publish Threads RU → reply с CTA/ссылкой
-**Scope:** Publisher Service code, Threads Graph API, feature flag
-**Non-goals:** Threads EN, Facebook, LinkedIn
-**Design:** docs/Sprint-4E-4F-Design.md
-**DoD:** versioned code + codex review + flag OFF + docs + verification plan
-
-## Sprint 4F: Facebook First Comment (AFTER 4E)
-
-**Цель:** после publish Facebook → первый комментарий с ссылкой
-**Scope:** Publer/Graph API comment
-**Design:** docs/Sprint-4E-4F-Design.md
-
-## Sprint 4G: LinkedIn System Audit & Integration Design (AFTER 4F)
+## Sprint 4G: LinkedIn System Audit & Integration Design (AFTER 4C)
 
 **Исследовательский спринт, НЕ implementation.**
 
