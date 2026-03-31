@@ -749,6 +749,83 @@ def verify_endpoint(req: VerifyRequest):
     return result
 
 
+class ApproveRequest(BaseModel):
+    """Move 'approved' rows to 'scheduled' for publishing."""
+    max_rows: int = 20
+
+
+class ApproveResult(BaseModel):
+    status: str
+    scheduled_count: int
+    rows: list[dict] = []
+
+
+@app.post("/approve", response_model=ApproveResult)
+def approve_endpoint(req: ApproveRequest):
+    """Move approved rows to scheduled. This is the manual gate between Curator and Publisher."""
+    conn = get_db()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE content.platform_posts SET status = 'scheduled' "
+            "WHERE status = 'approved' AND scheduled_at IS NOT NULL AND scheduled_at <= NOW() + interval '24 hours' "
+            "RETURNING id, post_id, platform, scheduled_at;"
+        )
+        rows = cur.fetchall()
+        conn.commit()
+        result_rows = [{"id": r[0], "post_id": r[1], "platform": r[2], "scheduled_at": str(r[3])} for r in rows[:req.max_rows]]
+        log.info("Approve gate", extra={"reason_code": "APPROVE_GATE", "platform_post_id": len(rows)})
+        _log_pipeline("approve_gate", "APPROVE_OK", detail={"count": len(rows)})
+        return ApproveResult(status="ok", scheduled_count=len(rows), rows=result_rows)
+    except Exception as e:
+        log.error(f"Approve failed: {e}")
+        conn.rollback()
+        return ApproveResult(status="error", scheduled_count=0)
+    finally:
+        conn.close()
+
+
+@app.get("/queue")
+def queue_endpoint():
+    """Show what's currently approved/scheduled/draft — the 'what will publish today' view."""
+    conn = get_db()
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT pp.status, pp.platform, count(*) as cnt
+            FROM content.platform_posts pp
+            WHERE pp.status IN ('approved', 'scheduled', 'draft')
+            GROUP BY pp.status, pp.platform
+            ORDER BY pp.status, pp.platform
+        """)
+        rows = cur.fetchall()
+        result = {}
+        for status, platform, cnt in rows:
+            if status not in result:
+                result[status] = {}
+            result[status][platform] = cnt
+        return result
+    finally:
+        conn.close()
+
+
+@app.post("/freeze")
+def freeze_endpoint():
+    """Emergency freeze: move all scheduled rows to draft."""
+    conn = get_db()
+    try:
+        cur = conn.cursor()
+        cur.execute("UPDATE content.platform_posts SET status = 'draft' WHERE status = 'scheduled' RETURNING id;")
+        rows = cur.fetchall()
+        conn.commit()
+        count = len(rows)
+        log.warning("Emergency freeze", extra={"reason_code": "FREEZE", "platform_post_id": count})
+        _log_pipeline("freeze", "FREEZE_ACTIVATED", detail={"frozen_count": count})
+        return {"status": "frozen", "count": count}
+    finally:
+        conn.close()
+
+
 class TestPublishRequest(BaseModel):
     platform: str
     text: str = "Safe test post from Publisher Service. Please ignore."
