@@ -2,6 +2,86 @@
 
 > Операционные процедуры для content pipeline. Обновлено 31 марта 2026.
 
+## Structured Logging (Sprint 2)
+
+### Таблица content.pipeline_log
+
+```mermaid
+erDiagram
+    pipeline_log {
+        int id PK
+        timestamptz ts
+        varchar stage
+        varchar reason_code
+        int news_id FK
+        int post_id FK
+        int platform_post_id FK
+        varchar execution_id
+        varchar platform
+        jsonb detail
+    }
+    pipeline_log }o--|| posts : post_id
+    pipeline_log }o--|| platform_posts : platform_post_id
+    pipeline_log }o--|| news_feed : news_id
+```
+
+### Correlation keys
+
+| Key | Назначение | Пример |
+|-----|-----------|--------|
+| news_id | Источник новости | 304 |
+| post_id | Мастер-контент | 47 |
+| platform_post_id | Платформенный вариант | 577 |
+| execution_id | n8n execution | 696 |
+
+### Reason codes
+
+| Stage | Code | Значение |
+|-------|------|---------|
+| scout | SCOUT_OK | Разведка завершена |
+| scout | SCOUT_DNS_FAIL | DNS ошибка |
+| writer | WRITER_OK | Пост создан |
+| writer | WRITER_DNS_FAIL | MiniMax DNS ошибка |
+| writer | WRITER_LOW_SCORE | Низкий quality score |
+| adapter | ADAPTER_OK | Адаптация завершена |
+| adapter | ADAPTER_DNS_FAIL | MiniMax DNS ошибка |
+| illustrator | ILLUST_OK | Картинка сгенерирована |
+| illustrator | ILLUST_NO_POST | Нет постов для иллюстрации |
+| curator | CURATOR_OK | Распределение завершено |
+| quality_gate | QG_PROFANITY | Мат обнаружен |
+| quality_gate | QG_AI_TELL | AI-tell проценты |
+| quality_gate | QG_LLM_LEAK | LLM reasoning leak |
+| publisher | PUB_START | Публикация начата |
+| publisher | PUB_OK | Опубликовано |
+| publisher | PUB_SKIPPED | Quality gate отклонил |
+| publisher | PUB_HTTP_ERR | Ошибка API платформы |
+| publisher | PUB_DB_FAIL | DB update failed |
+
+### Трассировка одного поста
+
+```sql
+-- 1. Найти путь поста по platform_post_id
+SELECT pp.id, pp.post_id, pp.platform, pp.status, pp.error,
+       p.news_id, p.quality_score, nf.title as news_title
+FROM content.platform_posts pp
+JOIN content.posts p ON p.id = pp.post_id
+LEFT JOIN content.news_feed nf ON nf.id = p.news_id
+WHERE pp.id = <platform_post_id>;
+
+-- 2. Все события в pipeline_log
+SELECT ts, stage, reason_code, platform, detail
+FROM content.pipeline_log
+WHERE post_id = <post_id>
+   OR platform_post_id = <platform_post_id>
+ORDER BY ts;
+
+-- 3. Последние ошибки
+SELECT ts, stage, reason_code, post_id, platform, detail
+FROM content.pipeline_log
+WHERE reason_code NOT LIKE '%_OK'
+ORDER BY ts DESC LIMIT 20;
+```
+
 ## Почему пост не вышел?
 
 ```mermaid

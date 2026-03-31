@@ -277,15 +277,16 @@ def get_post(post_id: int) -> dict | None:
 
 def _log_pipeline(stage: str, reason_code: str, post_id: int | None = None,
                   platform_post_id: int | None = None, platform: str | None = None,
+                  news_id: int | None = None, execution_id: str | None = None,
                   detail: dict | None = None):
     """Write structured log to content.pipeline_log table."""
     try:
         conn = get_db()
         cur = conn.cursor()
         cur.execute(
-            "INSERT INTO content.pipeline_log (stage, reason_code, post_id, platform_post_id, platform, detail) "
-            "VALUES (%s, %s, %s, %s, %s, %s)",
-            (stage, reason_code, post_id, platform_post_id, platform,
+            "INSERT INTO content.pipeline_log (stage, reason_code, post_id, platform_post_id, platform, news_id, execution_id, detail) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+            (stage, reason_code, post_id, platform_post_id, platform, news_id, execution_id,
              json.dumps(detail, ensure_ascii=False) if detail else None)
         )
         conn.commit()
