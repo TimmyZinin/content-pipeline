@@ -120,7 +120,7 @@ scheduled → skipped (Quality Gate reject)
 ### Deactivated
 - **Publisher v2** (1cD3qXs2XZkgcQyt) — ДЕАКТИВИРОВАН 22 мар 2026. Был причиной дубликатов и публикаций без картинок.
 
-### Current Rollout (Phase 1 allowlist)
+### Текущий статус публикации (Phase 3)
 
 **Сейчас активно публикуются:** 13 платформ (telegram, bluesky, threads_ru, threads_en, vk, facebook, mastodon, devto, hashnode, linkedin, writeas, minds, nostr)
 
