@@ -115,25 +115,28 @@ graph LR
 ```mermaid
 stateDiagram-v2
     [*] --> draft : Adapter создал
-    draft --> scheduled : Curator одобрил
+    draft --> approved : Curator одобрил
     draft --> skipped : Curator пропустил
+    approved --> scheduled : /approve gate (ручной)
     scheduled --> sending : Publisher atomic lock
     sending --> sent : API OK
     sending --> failed : 3 retry исчерпаны
     scheduled --> skipped : Quality Gate reject
     sent --> verified : read-back OK
-    note right of skipped : quality_gate: profanity\nquality_gate: AI-tell %\nquality_gate: LLM leak
+    note right of approved : Curator ставит approved\nНЕ scheduled напрямую
+    note right of scheduled : Только /approve gate
 ```
 
-| Статус | Описание |
-|--------|----------|
-| draft | Adapter создал, ожидает Curator |
-| scheduled | Curator одобрил, ожидает Publisher |
-| sending | Publisher atomic lock, публикация в процессе |
-| sent | API платформы ответил OK |
-| verified | Read-back подтвердил наличие поста |
-| failed | Ошибка после 3 retry |
-| skipped | Curator пропустил ИЛИ Quality Gate отклонил |
-| published | Legacy (Publisher v2) |
+| Статус | Описание | Кто ставит |
+|--------|----------|-----------|
+| draft | Adapter создал | Adapter workflow |
+| approved | Curator одобрил, ждёт ручной gate | Curator workflow |
+| scheduled | Одобрен к публикации | /approve endpoint |
+| sending | Publisher atomic lock | Publisher Service |
+| sent | API платформы ответил OK | Publisher Service |
+| verified | Read-back подтвердил | /verify endpoint |
+| failed | Ошибка после 3 retry | Publisher Service |
+| skipped | Curator/Quality Gate отклонил | Curator / QG |
+| published | Legacy (Publisher v2) | Deprecated |
 
 > Подробнее: [[Database]], [[Publisher]]
