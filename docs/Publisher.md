@@ -61,7 +61,7 @@ flowchart LR
 
 **Safe testing:** `/test-publish` **ОТКЛЮЧЁН** (HTTP 403). Публиковал в реальные аккаунты. Для тестирования — только local adapter testing.
 
-### Staged Rollout (allowlist)
+### Allowlist (Phase 3 — 13 платформ)
 
 **Primary filter:** SQL в n8n Publisher v3 workflow (Select Scheduled):
 ```sql
@@ -143,7 +143,7 @@ scheduled → skipped (Quality Gate reject)
 | Nostr | ✅ sent | 92928e1a... | Historically verified during manual tests 22 mar |
 | Tumblr | ❌ blocked | — | 401 OAuth expired. Adapter rewritten, credential needs refresh |
 | Mastodon | ❌ blocked | — | 401 token invalid |
-| LinkedIn | ⚡ separate | — | Own pipeline (/opt/linkedin-pipeline/). Not in Publisher v3 |
+| LinkedIn | ✅ sent | — | В Publisher v3 через адаптер linkedin.py. Ранее был отдельный pipeline |
 
 ---
 
