@@ -24,13 +24,19 @@ flowchart TB
     end
 
     subgraph ADAPTER["Adapter — Адаптер | 07:00 Istanbul"]
-        ADAPT["MiniMax M2.5<br/>10 платформ"]
+        ADAPT["MiniMax M2.5<br/>13 платформ"]
     end
 
     subgraph CURATOR["Curator — Куратор | 07:30 Istanbul"]
         TIER["Tier-система<br/>Quality-based selection"]
         DEDUP["Дедупликация<br/>topic_cluster 3 дня"]
         SCHED["Stagger scheduling<br/>Istanbul UTC+3"]
+    end
+
+    subgraph QUALITYGATE["Quality Gate — pre-publish | в Publisher Service"]
+        PROF["Профанити<br/>regex blocklist"]
+        AITELL["AI-tell проценты<br/>NN% + noun"]
+        LLMLEAK["LLM утечки<br/>think/reasoning tags"]
     end
 
     subgraph PUBLISHER["Publisher — Публикатор | */30 09-03 Istanbul"]
@@ -45,7 +51,9 @@ flowchart TB
     DB_POSTS --> GEMINI --> DB_POSTS
     DB_POSTS --> ADAPT --> DB_PP[("content.platform_posts<br/>status: draft")]
     DB_PP --> TIER & DEDUP --> SCHED --> DB_PP2[("content.platform_posts<br/>status: scheduled")]
-    DB_PP2 --> DIRECT & PUBLER & TWOAPI --> DB_PP3[("content.platform_posts<br/>status: published*")]
+    DB_PP2 --> PROF & AITELL & LLMLEAK
+    PROF & AITELL & LLMLEAK -->|pass| DIRECT & PUBLER & TWOAPI --> DB_PP3[("content.platform_posts<br/>status: sent")]
+    PROF & AITELL & LLMLEAK -->|reject| DB_SKIP[("status: skipped<br/>quality_gate error")]
 
     style SOURCES fill:#dbeafe,stroke:#2563eb
     style SCOUT fill:#dbeafe,stroke:#2563eb
@@ -53,6 +61,7 @@ flowchart TB
     style ILLUSTRATOR fill:#fef3c7,stroke:#d97706
     style ADAPTER fill:#ede9fe,stroke:#7c3aed
     style CURATOR fill:#fff7ed,stroke:#ea580c
+    style QUALITYGATE fill:#fef9c3,stroke:#ca8a04
     style PUBLISHER fill:#fce7f3,stroke:#db2777
 ```
 
@@ -97,17 +106,34 @@ graph LR
 | 05:00 | Scout | Сбор новостей из RSS, HN, GitHub |
 | 06:00 | Writer | Генерация 5 постов из лучших новостей |
 | 06:30 | Illustrator | Генерация картинок Gemini |
-| 07:00 | Adapter | Адаптация 5 постов на 14 платформ |
+| 07:00 | Adapter | Адаптация 5 постов на 13 платформ |
 | 07:30 | Curator | Распределение по расписанию |
 | 09:00-00:00 | Publisher | Публикация каждые 30 мин по scheduled_at |
 
-## Текущая модель статусов (Sprint 4A/4B/4C)
+## Текущая модель статусов
 
+```mermaid
+stateDiagram-v2
+    [*] --> draft : Adapter создал
+    draft --> scheduled : Curator одобрил
+    draft --> skipped : Curator пропустил
+    scheduled --> sending : Publisher atomic lock
+    sending --> sent : API OK
+    sending --> failed : 3 retry исчерпаны
+    scheduled --> skipped : Quality Gate reject
+    sent --> verified : read-back OK
+    note right of skipped : quality_gate: profanity\nquality_gate: AI-tell %\nquality_gate: LLM leak
 ```
-draft → scheduled → sending (atomic lock) → sent (API ok) → verified (read-back)
-draft → scheduled → sending → failed (after 3 retry)
-draft → skipped (пропущен Curator)
-published = legacy статус от старого Publisher v2
-```
+
+| Статус | Описание |
+|--------|----------|
+| draft | Adapter создал, ожидает Curator |
+| scheduled | Curator одобрил, ожидает Publisher |
+| sending | Publisher atomic lock, публикация в процессе |
+| sent | API платформы ответил OK |
+| verified | Read-back подтвердил наличие поста |
+| failed | Ошибка после 3 retry |
+| skipped | Curator пропустил ИЛИ Quality Gate отклонил |
+| published | Legacy (Publisher v2) |
 
 > Подробнее: [[Database]], [[Publisher]]

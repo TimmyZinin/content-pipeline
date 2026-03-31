@@ -4,6 +4,28 @@
 
 ---
 
+## 2026-03-30 | Quality Gate + Cache-Buster + nginx fix
+
+- **Quality Gate** добавлен в publisher-service (main.py:258-271)
+  - Профанити regex: блокирует мат в adapted_text, comment_text, reply_text
+  - AI-tell regex: блокирует фейковые проценты (NN% + noun)
+  - LLM leak: блокирует `<think>` / `<reasoning>` теги
+  - Rejected → status `skipped` (без retry)
+  - Combo-review: MiniMax 10/10 + Codex APPROVED (5 итераций)
+  - Unit tests: 18/18 passed
+- **Cache-buster** для image URL (`?v=nanoseconds`)
+  - Только для `corp.timzinin.com` (urlparse hostname check)
+  - Причина: Telegram/Threads кешировали старый nginx 302 redirect
+- **Nginx fix**: добавлен location `/content-images/` в `corp.timzinin.com`
+  - Раньше: попадал в `location /` → cookie auth → 302 → login.html
+  - Теперь: публичный доступ, `Cache-Control: public, immutable`, CORS
+- **Publisher v3 rollout**: расширен с Phase 1 (3 платформы) до Phase 3 (13 платформ)
+- **Инциденты 30 марта:**
+  - Post 51 ("нахер") опубликован в @timofeyzinin — quality gate был в неправильном файле (host vs container path)
+  - 4 debug сообщения отправлены в @timofeyzinin канал вместо тестового чата
+  - Post 458 опубликован нормальным pipeline (не учтены новые scheduled rows при freeze)
+- **Новое правило:** никаких публикаций без combo-review APPROVE
+
 ## 2026-03-22 | Hardening + Staged Rollout
 - Body-link hardening: Bluesky/Nostr char limit guard, Dev.to/Hashnode markdown CTA block
 - Allowlist PRIMARY: SQL upstream in n8n Select Scheduled (platform IN ...)
