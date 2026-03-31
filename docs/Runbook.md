@@ -88,6 +88,7 @@ ORDER BY ts DESC LIMIT 20;
 flowchart TD
     START["Пост не опубликован"] --> CHECK_STATUS["Проверить статус в БД"]
     CHECK_STATUS --> |"draft"| CURATOR["Curator не одобрил<br/>или freeze активен"]
+    CHECK_STATUS --> |"approved"| GATE["Ожидает /approve gate<br/>Curator одобрил, но<br/>ручной запуск не сделан"]
     CHECK_STATUS --> |"scheduled"| PUBLISHER["Publisher v3 не подхватил"]
     CHECK_STATUS --> |"sending"| STUCK["Пост застрял в sending"]
     CHECK_STATUS --> |"failed"| FAILED["3 retry исчерпаны"]
@@ -109,6 +110,35 @@ flowchart TD
     SKIPPED --> SKIP_ERROR["Проверить error"]
     SKIP_ERROR --> |"quality_gate: profanity"| FIX_TEXT["Убрать мат из текста"]
     SKIP_ERROR --> |"quality_gate: AI-tell"| FIX_PCT["Убрать фейковые проценты"]
+```
+
+## Scheduling Control (Sprint 3)
+
+### Каноническая модель
+```
+draft → approved (Curator) → scheduled (/approve) → sent (Publisher)
+```
+
+### Просмотр очереди
+```bash
+curl -s http://127.0.0.1:8086/queue | python3 -m json.tool
+```
+
+### Одобрить публикацию (approved → scheduled)
+```bash
+curl -s -X POST http://127.0.0.1:8086/approve | python3 -m json.tool
+```
+
+### Emergency freeze (scheduled → draft)
+```bash
+curl -s -X POST http://127.0.0.1:8086/freeze | python3 -m json.tool
+```
+
+### Все approved (ожидают /approve)
+```sql
+SELECT id, post_id, platform, scheduled_at
+FROM content.platform_posts WHERE status = 'approved'
+ORDER BY scheduled_at;
 ```
 
 ## Команды диагностики
