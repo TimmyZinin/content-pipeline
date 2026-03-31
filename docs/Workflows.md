@@ -11,7 +11,7 @@
 | 3 | Illustrator — Художник | Z94O5uyaFEmrYGIJ | 06:30 Istanbul | ✅ Active |
 | 4 | Adapter — Адаптер | NJoPcdp38ZU0dQwG | 07:00 Istanbul | ✅ Active |
 | 5 | Curator — Куратор | EYPcT5B4rLmQRQBM | 07:30 Istanbul | ✅ Active |
-| 6 | Publisher v3 | ErbbScuvxWHLX1np | */30 09:00-03:00 Istanbul | ⚠️ Staged rollout (telegram, writeas, minds) |
+| 6 | Publisher v3 | ErbbScuvxWHLX1np | */30 09:00-03:00 Istanbul | ✅ Phase 3 (13 платформ + Quality Gate) |
 | 7 | Dashboard — Дашборд | DC3a34HOedbU7rVb | webhook | ✅ Active |
 | 8 | Curator Preview | JzYcKrUfXheatEi1 | webhook | ✅ Active |
 | 9 | Observer — Наблюдатель | V2wnna7ACw5iSqdi | webhook | ✅ Active |
@@ -20,7 +20,7 @@
 
 | Workflow | n8n ID | Причина |
 |---------|--------|---------|
-| LinkedIn Pipeline v3 (n8n) | umId4uV39dewR8Um | Деактивирован в n8n. LinkedIn живёт отдельным standalone pipeline (/opt/linkedin-pipeline/) |
+| LinkedIn Pipeline v3 (n8n) | umId4uV39dewR8Um | Деактивирован. LinkedIn теперь в Publisher v3 через адаптер linkedin.py |
 | Threads News | JHZEnMf87VLN93pI | Заменён Publisher v3 |
 | Publisher v2 | 1cD3qXs2XZkgcQyt | Заменён Publisher v3 (дубликаты, нет картинок) |
 
@@ -125,19 +125,16 @@ flowchart LR
     CRON["Schedule\n*/30 09-03 Istanbul"] --> SQL["Select Scheduled\nLIMIT 1\nWHERE platform IN allowlist"]
     SQL --> IF1{"Has Post?"}
     IF1 -->|Да| HTTP["Call Publisher\nPOST :8085/publish"]
-    HTTP --> CHK["Check Result\n(pass-through, no DB write)"]
-    CHK --> IF2{"Dead Letter?\nretries >= 3"}
+    HTTP --> UPD["Update Status\nsent / failed + retry"]
+    UPD --> IF2{"Dead Letter?\nretries >= 3"}
     IF2 -->|Да| TG["TG Alert"]
 ```
 
 **Python Publisher Service:** Docker :8086 (internal :8085), reads post by ID from DB, calls auto-publisher adapter
 **Модель:** `scheduled → sending (lock) → sent (API ok) → verified (/verify)` / `→ failed (retry 3x → TG alert)`
 **Anti-duplicate:** atomic lock через `sending` status, отказ при повторном вызове
-**Current rollout (staged):** telegram, writeas, minds
-**Historically verified capability (10):** Telegram, Dev.to, VK, Threads RU, Hashnode, Facebook (Publer), Threads EN (Publer), Write.as, Minds, Nostr
-**Partial capability:** Bluesky (text ok, image >1MB blocked)
-**Blocked:** Tumblr (401 OAuth), Mastodon (401 token)
-**Separate pipeline:** LinkedIn
+**Current rollout (Phase 3):** 13 платформ — telegram, bluesky, threads_ru, threads_en, vk, facebook, mastodon, devto, hashnode, linkedin, writeas, minds, nostr
+**Quality Gate:** профанити + AI-tell % + LLM leak (pre-publish filter)
 **/verify:** endpoint для external read-back (6 платформ)
 **Подробнее:** [[Publisher]]
 
