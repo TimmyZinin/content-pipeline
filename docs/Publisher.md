@@ -88,25 +88,45 @@ WHERE platform IN ('telegram','bluesky','threads_ru','threads_en','vk','facebook
 
 **Anti-duplicate guard:** перед публикацией сервис атомарно ставит `status='sending'` через `UPDATE ... WHERE status IN ('scheduled','failed') RETURNING id`. Если пост уже `sent`, `verified`, `published` или `sending` — возвращает HTTP 400/409. Это предотвращает повторную публикацию при параллельных вызовах или ручном тестировании.
 
-### Текущая модель статусов
+### Каноническая модель статусов (Sprint 3)
 
-```
-draft → scheduled → sending → sent → verified
-draft → scheduled → sending → failed (после 3 retry)
-draft → skipped (Curator пропустил)
-scheduled → skipped (Quality Gate reject)
+```mermaid
+stateDiagram-v2
+    [*] --> draft : Adapter создал
+    draft --> approved : Curator одобрил
+    draft --> skipped : Curator пропустил
+    approved --> scheduled : /approve gate (ручной)
+    scheduled --> sending : Publisher atomic lock
+    sending --> sent : API OK
+    sending --> failed : 3 retry исчерпаны
+    scheduled --> skipped : Quality Gate reject
+    note right of approved : Curator ставит approved\nНЕ scheduled
+    note right of scheduled : Только /approve gate\nможет перевести сюда
 ```
 
-| Статус | Что означает |
-|--------|-------------|
-| draft | Adapter создал, ожидает Curator |
-| scheduled | Curator назначил, ожидает Publisher |
-| sending | Atomic lock: Publisher Service взял пост, публикация в процессе |
-| sent | API платформы ответил OK, external_id записан |
-| verified | /verify подтвердил наличие поста на платформе |
-| failed | Ошибка после 3 retry, TG alert отправлен |
-| skipped | Curator пропустил ИЛИ Quality Gate отклонил (quality_gate: ...) |
-| published | Legacy статус от старого Publisher v2 |
+| Статус | Что означает | Кто ставит |
+|--------|-------------|-----------|
+| draft | Adapter создал | Adapter workflow |
+| approved | Curator одобрил, ожидает ручного gate | Curator workflow |
+| scheduled | Одобрен к публикации | `/approve` endpoint (ручной) |
+| sending | Publisher atomic lock | Publisher Service |
+| sent | Опубликован | Publisher Service |
+| verified | Read-back подтвердил | /verify endpoint |
+| failed | 3 retry исчерпаны | Publisher Service |
+| skipped | Curator/Quality Gate отклонил | Curator / Quality Gate |
+| published | Legacy (Publisher v2) | Deprecated |
+
+### Scheduling Control endpoints
+
+| Method | Path | Что делает |
+|--------|------|-----------|
+| POST | /approve | Переводит `approved` → `scheduled` (manual gate) |
+| POST | /freeze | Emergency: `scheduled` → `draft` |
+| GET | /queue | Показывает pending approved/scheduled/draft |
+
+### Backlog dump protection
+
+Curator больше **НЕ ставит `scheduled`** напрямую. Ставит `approved`. Publisher v3 видит только `scheduled` rows. Единственный путь в `scheduled` — через `/approve` endpoint. Это предотвращает автоматическую публикацию без ручного одобрения.
 
 **Verify endpoint:** проверяет наличие поста на платформе по external_id.
 
