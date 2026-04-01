@@ -40,7 +40,7 @@ graph TD
 | 5 | Threads EN | EN | 5/день | Publer 2-step media | ⚠️ Recently verified | 2026-03-28 23:00 (3 дня) |
 | 6 | Facebook | RU | 1/день | Publer (personal profile) | ⚠️ Recently verified | 2026-03-28 19:30 (3 дня) |
 | 7 | VK | RU | 1/день | Direct adapter (community) | ⚠️ Recently verified | 2026-03-28 19:00 (3 дня) |
-| 8 | LinkedIn | RU | 1/день ПН/СР/ПТ | Direct adapter | ⚠️ Recently verified | 2026-03-27 11:30 (5 дней) |
+| 8 | LinkedIn | RU | 1/день ПН/СР/ПТ | Direct adapter | ⚠️ Recently verified | 2026-03-27 11:30 |
 | 9 | Dev.to | EN | 1/нед (ПН) | Direct adapter | ⏳ Historically worked | 2026-03-23 (9 дней) |
 | 10 | Hashnode | EN | 1/нед (ПН) | Direct adapter (GraphQL) | ⏳ Historically worked | 2026-03-23 (9 дней) |
 | 11 | Write.as | EN | 1/нед (ПН) | Direct adapter | ⏳ Historically worked | Manual test 22 Mar |
