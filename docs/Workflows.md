@@ -112,7 +112,7 @@ flowchart LR
 **Tier-система:** см. [[Curator]]
 **Дедупликация:** topic_cluster за последние 3 дня — fresh посты приоритетнее stale
 **Scheduling:** Istanbul UTC+3, stagger по платформам
-**Результат:** ~14-25 записей `scheduled`, остальные `skipped`
+**Результат:** ~14-25 записей `approved` (ожидают /approve gate), остальные `skipped`
 
 ---
 
