@@ -89,12 +89,12 @@ flowchart LR
 ```mermaid
 flowchart LR
     CRON["Cron 07:00 Istanbul"] --> SQL["Неадаптированные посты"]
-    SQL --> LLM["MiniMax M2.5\n10 платформ"]
+    SQL --> LLM["MiniMax M2.5\n13 платформ"]
     LLM --> DB["content.platform_posts\nпост + комментарий\n+ reply + ссылка"]
     DB --> SYNC["Синхронизация\nDashboard"]
 ```
 
-**10 платформ:** telegram, linkedin, threads_ru, threads_en, vk, bluesky, facebook, mastodon, devto, hashnode
+**13 платформ:** telegram, linkedin, threads_ru, threads_en, vk, bluesky, facebook, mastodon, devto, hashnode, writeas, minds, nostr
 **Составные сущности:** post_text + comment_text (LI/FB) + reply_text (Threads) + link_url + include_image
 **Результат:** ~50 записей/день в `content.platform_posts` со статусом `draft`
 
@@ -106,7 +106,7 @@ flowchart LR
 flowchart LR
     CRON["Cron 07:30 Istanbul"] --> SQL["Все draft посты\n+ quality_score\n+ topic_cluster"]
     SQL --> CODE["Распределение по Tier\n+ дедупликация\n+ stagger scheduling"]
-    CODE --> UPDATE["scheduled_at\nstatus = scheduled|skipped"]
+    CODE --> UPDATE["scheduled_at\nstatus = approved|skipped"]
 ```
 
 **Tier-система:** см. [[Curator]]
