@@ -31,24 +31,24 @@ graph TD
 
 ## Полная таблица
 
-| # | Платформа | Язык | Частота | Метод | Current status (31 мар 2026) | Last publish |
-|---|-----------|------|---------|-------|------------------------------|-------------|
-| 1 | Telegram @timofeyzinin | RU | 2/день | Direct adapter | ✅ Currently verified | Mar 31 (msg_id=318) |
-| 2 | Threads RU @timzinin | RU | 5/день | Direct adapter (2-step) | ✅ Currently verified | Mar 30 |
-| 3 | Threads EN | EN | 5/день | Publer 2-step media | ⚠️ Recently verified | Mar 28 |
-| 4 | LinkedIn | RU | 1/день ПН/СР/ПТ | Direct adapter | ⚠️ Recently verified | Mar 27 |
-| 5 | Bluesky | EN | 3/день | Direct adapter (auto-resize) | ✅ Currently verified | Mar 30 |
-| 6 | Mastodon | EN | 1/день | Direct adapter | ⚠️ Recently verified | Mar 29 |
-| 7 | VK | RU | 1/день | Direct adapter (community) | ⚠️ Recently verified | Mar 28 |
-| 8 | Facebook | RU | 1/день | Publer (personal profile) | ⚠️ Recently verified | Mar 28 |
-| 9 | Dev.to | EN | 1/нед (ПН) | Direct adapter | ⏳ Historically worked | Mar 23 |
-| 10 | Hashnode | EN | 1/нед (ПН) | Direct adapter (GraphQL) | ⏳ Historically worked | Mar 23 |
+| # | Платформа | Язык | Частота | Метод | Status (1 апр 2026) | Last published_at (UTC) |
+|---|-----------|------|---------|-------|---------------------|------------------------|
+| 1 | Telegram @timofeyzinin | RU | 2/день | Direct adapter | ⚠️ Recently verified | 2026-03-31 10:00 (1 день) |
+| 2 | Threads RU @timzinin | RU | 5/день | Direct adapter (2-step) | ⚠️ Recently verified | 2026-03-30 10:09 (2 дня) |
+| 3 | Bluesky | EN | 3/день | Direct adapter (auto-resize) | ⚠️ Recently verified | 2026-03-30 10:09 (2 дня) |
+| 4 | Mastodon | EN | 1/день | Direct adapter | ⚠️ Recently verified | 2026-03-29 13:00 (3 дня) |
+| 5 | Threads EN | EN | 5/день | Publer 2-step media | ⚠️ Recently verified | 2026-03-28 23:00 (3 дня) |
+| 6 | Facebook | RU | 1/день | Publer (personal profile) | ⚠️ Recently verified | 2026-03-28 19:30 (3 дня) |
+| 7 | VK | RU | 1/день | Direct adapter (community) | ⚠️ Recently verified | 2026-03-28 19:00 (3 дня) |
+| 8 | LinkedIn | RU | 1/день ПН/СР/ПТ | Direct adapter | ⚠️ Recently verified | 2026-03-27 11:30 (5 дней) |
+| 9 | Dev.to | EN | 1/нед (ПН) | Direct adapter | ⏳ Historically worked | 2026-03-23 (9 дней) |
+| 10 | Hashnode | EN | 1/нед (ПН) | Direct adapter (GraphQL) | ⏳ Historically worked | 2026-03-23 (9 дней) |
 | 11 | Write.as | EN | 1/нед (ПН) | Direct adapter | ⏳ Historically worked | Manual test 22 Mar |
 | 12 | Minds | EN | ПН/СР/ПТ | Direct adapter | ⏳ Historically worked | Manual test 22 Mar |
 | 13 | Nostr | EN | ПН/СР/ПТ | Direct adapter | ⏳ Historically worked | Manual test 22 Mar |
 | 14 | Tumblr | EN | ПН/СР/ПТ | — | ❌ Blocked (401 OAuth) | Never |
 
-Legend: ✅ = published in last 2 days | ⚠️ = published in last 7 days | ⏳ = published >7 days ago | ❌ = blocked
+Legend: ⚠️ = published ≤7 days ago | ⏳ = published >7 days ago | ❌ = blocked
 
 ## Не подключены (бэклог)
 
