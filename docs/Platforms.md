@@ -17,9 +17,9 @@ graph TD
     T1 --> BS["Bluesky 3/день"]
     T1 --> MAS["Mastodon 1/день"]
 
-    T2 --> LI["LinkedIn 1/день"]
-    T2 --> VK["VK 1/день"]
-    T2 --> FB["Facebook 1/день"]
+    T2 --> LI["LinkedIn ПН/СР/ПТ"]
+    T2 --> VK["VK ПН/СР/ПТ"]
+    T2 --> FB["Facebook ПН/СР/ПТ"]
 
     T3 --> DEV["Dev.to 1/нед"]
     T3 --> HASH["Hashnode 1/нед"]
